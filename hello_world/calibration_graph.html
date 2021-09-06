@@ -1,0 +1,149 @@
+
+
+
+
+
+<div class="container-fluid page-body-wrapper">
+      <div class="main-panel">
+        <div class="content-wrapper">
+
+          <div class="row" >
+
+<!--        <style type="text/css">-->
+
+<!--            .buttons {-->
+<!--                font-size: 4em;-->
+<!--                display: flex;-->
+<!--                justify-content: center;-->
+<!--            }-->
+<!--            .button, .value {-->
+<!--                line-height: 1;-->
+<!--                padding: 2rem;-->
+<!--                margin: 2rem;-->
+<!--                border: medium solid;-->
+<!--                min-height: 1em;-->
+<!--                min-width: 1em;-->
+<!--            }-->
+<!--            .button {-->
+<!--                cursor: pointer;-->
+<!--                user-select: none;-->
+<!--            }-->
+<!--            .minus {-->
+<!--                color: red;-->
+<!--            }-->
+<!--            .plus {-->
+<!--                color: green;-->
+<!--            }-->
+<!--            .value {-->
+<!--                min-width: 2em;-->
+<!--            }-->
+<!--            .state {-->
+<!--                font-size: 2em;-->
+<!--            }-->
+<!--        </style>-->
+
+<!--        <div class="buttons">-->
+<!--            <div class="minus button">-</div>-->
+<!--            <div class="value">?</div>-->
+<!--            <div class="plus button">+</div>-->
+<!--        </div>-->
+<!--        <div class="state">-->
+<!--            <span class="users">?</span> online-->
+<!--        </div>-->
+        <script>
+            // var minus = document.querySelector('.minus'),
+            //     plus = document.querySelector('.plus'),
+            //     value = document.querySelector('.value'),
+            //     users = document.querySelector('.users'),
+            //     websocket = new WebSocket("ws://127.0.0.1:6789/");
+            // minus.onclick = function (event) {
+            //     websocket.send(JSON.stringify({action: 'minus'}));
+            // }
+            // plus.onclick = function (event) {
+            //     websocket.send(JSON.stringify({action: 'plus'}));
+            // }
+            // websocket.onmessage = function (event) {
+            //     data = JSON.parse(event.data);
+            //     switch (data.type) {
+            //         case 'state':
+            //             value.textContent = data.value;
+            //             break;
+            //         case 'users':
+            //             users.textContent = (
+            //                 data.count.toString() + " user" +
+            //                 (data.count == 1 ? "" : "s"));
+            //             break;
+            //         default:
+            //             console.error(
+            //                 "unsupported event", data);
+            //     }
+            // };
+
+            window.onload = function () {
+
+var dps = []; // dataPoints
+var chart = new CanvasJS.Chart("chartContainer", {
+	title :{
+		text: "Remote Calibration"
+	},
+	data: [{
+		type: "line",
+		dataPoints: dps
+	}]
+});
+
+var xVal = 0;
+var yVal = 200;
+var updateInterval = 10000;
+var dataLength = 8; // number of dataPoints visible at any point
+
+var updateChart = function (count) {
+
+	count = count || 1;
+    var i= Math.floor(Math.random() * 20) + 5;
+	// for (var j = 0; j < count; j++) {
+
+		yVal = yVal - i;
+		if(yVal > 0) {
+            dps.push({
+                x: xVal,
+                y: yVal
+            });
+
+            xVal++;
+        }
+
+	// }
+	if (dps.length > dataLength) {
+		dps.shift();
+	}
+
+	chart.render();
+};
+
+updateChart(dataLength);
+setInterval(function(){updateChart()}, updateInterval);
+
+}
+        </script>
+<style>
+    .canvasjs-chart-credit{
+        display: none!important;
+    }
+</style>
+              <div class="card">
+                  <div class="row">
+                      <div class="col-md-12" >
+
+
+<div id="chartContainer" style="min-width: 800px;margin: 0px auto;"></div>
+<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+                      </div>
+                  </div>
+              </div>
+
+
+
+          </div>
+
+        </div>

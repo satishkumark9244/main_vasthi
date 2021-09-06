@@ -1,0 +1,2333 @@
+
+<script type="text/javascript">
+
+
+    mainurl = window.location.href;
+     wwwextns = mainurl.includes("www.")
+    if(wwwextns){
+        window.location.href = "https://vasthienviro.com";
+    }
+    //hello upadte-24
+
+    var db;
+    var dbReq = indexedDB.open('adminenviro', 1);
+
+    var url_str = window.location.href;
+    var window_url = new URL(url_str);
+    var search_params = window_url.searchParams;
+
+    var today = new Date();
+    var dd = String(today.getDate()).padStart(2, '0');
+    var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+    var yyyy = today.getFullYear();
+
+    today = yyyy+'-'+mm+'-'+dd;
+    dbReq.onupgradeneeded = function(event) {
+      // Set the db variable to our database so we can use it!
+      db = event.target.result;
+      let userdata = db.createObjectStore('userdata', {autoIncrement: true});
+
+
+    }
+    dbReq.onsuccess = function(event) {
+
+
+         db = dbReq.result;
+            $(document).ready(function() { extraoptions(db);});
+
+    }
+    dbReq.onerror = function(event) {
+
+      alert('error opening database ' + event.target.errorCode);
+    }
+
+
+    function checkTable(db){
+
+
+        let tx = db.transaction(['userdata'], 'readonly');
+        let store = tx.objectStore('userdata');
+        let req = store.openCursor();
+        var countRequest = store.count();
+
+
+        countRequest.onsuccess = function() {
+            var url = search_params.get('url');
+            // alert(url);
+
+          if(countRequest.result>0){
+
+              if(url == "login" || url == "" || url == "null" || url == null){
+                  window.location.href = "https://vasthienviro.com?url=dashboard";
+              }else if(url == "readings") {
+                  showSingleReadings();
+              }else if(url == "stationviewalldata"){
+                  displaystationall1();
+              }else if(url == "stationlist"){
+                  showSingleReadings();
+              }else  if(url == "download_page"){
+                  sendCmd5Requestdownload();
+              }else if(url == "report_view"){
+                  showSingleReport();
+              }else if(url == "industry_report"){
+                  industrydetails();
+              }else if(url == "license_renew"){
+                  showSingleReadingslicense();
+              }else if(url == "readingdata"){
+                  sendCmd5Request();
+              }else if(url == "graph_view"){
+                    sendCmd5Request();
+              }else if(url == "stationview"){
+                    stationview();
+
+              }
+
+
+            }else{
+              if(!(url == "login" || url == "" || url == "null" || url == null)){
+                  window.location.href = "https://vasthienviro.com?url=login";
+              }
+
+          }
+
+          if(url == "login" || url == "dashboard"){
+
+
+              // db.close();
+          }
+
+
+    }
+
+
+
+    // let tx = db.transaction(['subject'], 'readonly');
+    // let store = tx.objectStore('subject');
+    // var keyRangeValue;
+    // keyRangeValue = IDBKeyRange.only();
+  }
+  var url = search_params.get('url');
+ if(url == "download_page"){
+
+                  var station_id = search_params.get('station_id');
+                  var industry_id = search_params.get('industry_id');
+                  var fromdate1 = search_params.get('fromdate')+" 00:00:00";
+                  var todate1 = search_params.get('todate')+" 23:59:00";
+                  var average = search_params.get('average');
+                  var unit = search_params.get('unit');
+                  var date = new Date(fromdate1);
+                  var fromdate = Math.floor(date.getTime() / 1000);
+
+                  var date1 = new Date(todate1);
+                    var todate = Math.floor(date1.getTime() / 1000);
+
+
+                    data = {
+                        cmd: "79",
+                        industry_id:industry_id,
+                        station_id:station_id,
+                        fromdate:"STATION_"+station_id+"#"+fromdate,
+                        todate:"STATION_"+station_id+"#"+todate,
+                        average:average,
+                        unit:unit
+                    }
+                    sendRequest(data,79,industry_id);
+
+
+              }else if(url == "industry_report_page"){
+
+
+                  var industry_id = search_params.get('industry_id');
+                  var fromdate1 = search_params.get('fromdate')+" 00:00:00.000";
+                  var todate1 = search_params.get('todate')+" 23:59:00.000";
+                  var average = search_params.get('average');
+                  var unit = search_params.get('unit');
+                  var date = new Date(fromdate1);
+                  var fromdate = Math.floor(date.getTime() / 1000);
+
+                  var date1 = new Date(todate1);
+                    var todate = Math.floor(date1.getTime() / 1000);
+
+
+                    data = {
+                        cmd: "80",
+                        industry_id:industry_id,
+                        fromdate:fromdate1,
+                        todate:todate1,
+                        average:average,
+                        unit:unit
+                    }
+                    sendRequest(data,80,industry_id);
+
+
+              }
+
+
+
+
+
+  function logout123() {
+
+        sessionStorage.clear();
+        localStorage.clear();
+        indexedDB.databases().then(dbs => {
+          dbs.forEach(db => indexedDB.deleteDatabase(db.name))
+        });
+        var transaction = db.transaction(["userdata"], "readwrite");
+        var objectStore = transaction.objectStore("userdata");
+        var objectStoreRequest = objectStore.clear();
+        objectStoreRequest.onsuccess = function(event) {
+            // report the success of our request
+
+          };
+        // signOut();
+      window.location.href = "?url=login";
+}
+
+
+
+
+function sendCmd5Request(){
+        let tx = db.transaction(['userdata'], 'readonly');
+        let store = tx.objectStore('userdata');
+
+        let userdata = [];
+        let req = store.openCursor();
+        req.onsuccess = function(event) {
+            // The result of req.onsuccess is an IDBCursor
+            let cursor = event.target.result;
+            if (cursor != null) {
+              // If the cursor isn't null, we got an IndexedDB item.
+              // Add it to the note array and have the cursor continue!
+
+              userdata.push(cursor.value);
+              cursor.continue();
+            } else {
+                var userdatadetails = userdata[0];
+                var each_subject = JSON.stringify(userdatadetails);
+                var row = JSON.parse(each_subject);
+
+                // var user_main_details = document.getElementById("stationlist");
+                var curretnme =  new Date().toLocaleString();
+                var curredate = new Date().toLocaleDateString();
+             // var row = userdatadetailsmain;
+                // var industry_id = row['industry_id'];
+                var industry_id = row[0]['industry_id'];
+                var industry_name = row[0]['industry_name'];
+                var industry_cat = row[0]['industry_cat'];
+                var industry_type = row[0]['industry_type'];
+                var site_address = row[0]['site_address'];
+
+                var analyser_ids = search_params.get('analyser_id');
+                var station_ids = search_params.get('station_id');
+                var fromdate = search_params.get('fromdate');
+                var todate = search_params.get('todate');
+                var average = search_params.get('average');
+                var url = search_params.get('url');
+                if(url != "graph_view") {
+                   document.getElementById("sitedetails").innerHTML = " Company Name : " + industry_name + "\n Industry Category : " + industry_cat + " \n Location : " + site_address + " \n Industry Type : " + industry_type + " \n Average Interval : 15 min\n  From: " + fromdate + " 00:00:00 To: " + todate +"\n";
+                }
+                    data = {
+                        cmd: "5",
+                        analyser_id:analyser_ids,
+                        industry_id:industry_id,
+                        station_id:"STATION_"+station_ids,
+                        datentime:today
+                    }
+                    sendRequest(data,5,industry_id);
+            }
+        }
+        req.onerror = function(event) {
+            alert('error in cursor request ' + event.target.errorCode);
+        }
+}
+
+ function sendCmd5Requestdownload(){
+        let tx = db.transaction(['userdata'], 'readonly');
+        let store = tx.objectStore('userdata');
+
+        let userdata = [];
+        let req = store.openCursor();
+        req.onsuccess = function(event) {
+            // The result of req.onsuccess is an IDBCursor
+            let cursor = event.target.result;
+            if (cursor != null) {
+              // If the cursor isn't null, we got an IndexedDB item.
+              // Add it to the note array and have the cursor continue!
+
+              userdata.push(cursor.value);
+              cursor.continue();
+            } else {
+                var userdatadetails = userdata[0];
+                var each_subject = JSON.stringify(userdatadetails);
+                var row = JSON.parse(each_subject);
+
+                // var user_main_details = document.getElementById("stationlist");
+                var curretnme =  new Date().toLocaleString();
+                var curredate = new Date().toLocaleDateString();
+             // var row = userdatadetailsmain;
+                // var industry_id = row['industry_id'];
+                var industry_id = row[0]['industry_id'];
+                var industry_name = row[0]['industry_name'];
+                var industry_cat = row[0]['industry_cat'];
+                var industry_type = row[0]['industry_type'];
+                var site_address = row[0]['site_address'];
+
+                var analyser_ids = search_params.get('analyser_id');
+                var station_ids = search_params.get('station_id');
+                var fromdate = search_params.get('fromdate');
+                var todate = search_params.get('todate');
+                var average = search_params.get('average');
+                var url = search_params.get('url');
+                if(url != "graph_view") {
+                    document.getElementById("sitedetails").innerHTML = " Company Name : " + industry_name + "\n Industry Category : " + industry_cat + " \n Location : " + site_address + " \n Industry Type : " + industry_type + " \n Average Interval : 15 min\n  From: " + fromdate + " 00:00:00 To: " + todate +"\n";
+                    document.getElementById("graphheading").innerHTML ="<table><tr> <td style=\"padding: 8px!important; float: left; \"><b>Company Name :</b></td> <td style=\"padding: 8px!important; float: left; \"> " + industry_name + "</td> </tr> <tr> <td style=\"padding: 8px!important; float: left; \"><b>Category :</b></td> <td style=\"padding: 8px!important; float: left; \">" + industry_cat + "</td> </tr> <tr> <td style=\"padding: 8px!important; float: left; \"><b>Location :</b></td> <td style=\"padding: 8px!important; float: left; \">" + site_address + "</td> </tr> <tr> <td style=\"padding: 8px!important; float: left; \"><b>Industry Type :</b></td> <td style=\"padding: 8px!important; float: left; \">" + industry_type + "</td> </tr> <tr> <td style=\"padding: 8px!important; float: left; \"><b>Average Interval :</b></td> <td style=\"padding: 8px!important; float: left; \"> "+average+"</td> </tr> <tr> <td style=\"padding: 8px!important; float: left; \"><b>From:</b></td> <td style=\"padding: 8px!important; float: left; \">" + fromdate + "</td> </tr> <tr> <td style=\"padding: 8px!important; float: left; \"><b>To:</b></td> <td style=\"padding: 8px!important; float: left; \">" +todate+"</td> </tr> </table>";
+                }
+
+
+            }
+        }
+        req.onerror = function(event) {
+            alert('error in cursor request ' + event.target.errorCode);
+        }
+}
+ // data = {
+ //             cmd: "70",
+ //
+ //          }
+ //                    sendRequest(data,70,"industry_id");
+ // STATION_BF2_CAST_HOUSE_DE_DUSTING###22618008-6af1-40f0-804c-98e49cb1d6d7
+
+
+
+      data = {
+        cmd: "77",
+     }
+
+    // sendRequest(data,77,0);
+  function sendRequest($data,$cmd,$industry_id){
+
+            $.ajax({
+                url: "https://vasthienviro.com?url=api",
+                type: 'POST',
+                crossDomain: true,
+                dataType: 'json',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify($data),
+                success: function(result) {
+
+                    switch($cmd){
+                        case 2:
+                        // console.log("sendRequest-33333333333333333333333        "+JSON.stringify(result));
+                            displayStationsdata(result);
+                        break;
+                        case 1:
+                            innerStationsdata(result);
+                        break;
+                        case 77:
+                           // console.log("sendRequest-33333333333333333333333        "+JSON.stringify(result));
+                        break;
+                        case 79:
+                           // downloadgenerate(result);
+                           insertReportdata(result);
+
+                        break;
+                        case 80:
+                           downloadindustryreport(result);
+
+                        break;
+                        case 7:
+                            // var modifiedResult = result.replace("'{"," ");
+                            //  modifiedResult = modifiedResult.replace("}'"," ");
+
+
+                            // console.log("sendRequest-33333333333333333333333        "+modifiedResult);
+                            readingsdata(result);
+                        break;
+                        case 8:
+
+                            break;
+                        case 79:
+
+                                // reportdownload();
+                            break;
+                        case 4:
+                             // console.log("sendRequest-33333333333333333333333        "+JSON.stringify(result));
+                            // readingsdata(result);
+                        break;
+                        case 70:
+                            // displaystationalldata(result);
+                             // console.log("sendRequest-33333333333333333333333        "+JSON.stringify(result));
+                            // readingsdata(result);
+                        break;
+                        case 5:
+                             // console.log("sendRequest-33333333333333333333333        "+JSON.stringify(result));
+                            readingstationdata(result);
+                        break;
+                        case 6:
+                            // alert("workinggggg");
+                            if(result == "fail"){
+                                var error_msg = document.getElementById('error_msg');
+                                error_msg.innerHTML = "Invalid Credentials!";
+                            }else{
+                                insertUserdata(result);
+                            }
+                            break;
+                    }
+
+                },
+
+                error: function(xhr, textStatus, error) {
+                    if($cmd == 6){
+                        var error_msg = document.getElementById('error_msg');
+                        error_msg.innerHTML = "Invalid Credentials!";
+                    }
+                    console.log(xhr.responseText);
+                    console.log(xhr.statusText);
+                    console.log(textStatus);
+                    console.log(error);
+                },
+        // beforeSend: setHeader
+            });
+        }
+
+
+
+  function displayStationsdata($result){
+        // console.log("insertStatiobs-44444444444444444--");
+        var result = $result;
+              var j =0;
+             var stationsdata = document.getElementById('stationsdata');
+
+        data = result
+        var data_length = data.length;
+
+      // console.log("insertStatiobs-44444444444444444--" +data_length);
+
+        for (i=0;i<data_length;i++) {
+
+            var industry_name = data[i].industry_name;
+            var industry_cat = data[i].industry_cat;
+            var industry_type = data[i].industry_type;
+            var industry_mis_id = data[i].industry_mis_id;
+            var site_address = data[i].site_address;
+            var city = data[i].city;
+            var district = data[i].district;
+            var state = data[i].state;
+            var pincode = data[i].pincode;
+            var installed_pc = data[i].installed_pc;
+            var contact_name = data[i].contact_name;
+            var designation = data[i].designation;
+            var mobile = data[i].mobile;
+            var email = data[i].email;
+            var user_name = data[i].user_name;
+            var password = data[i].password;
+            var station_id = data[i].station_id;
+            var analyser_id = data[i].analyser_id;
+            var stack_name = data[i].stack_name;
+            var monitoring_id = data[i].monitoring_id;
+            var no_of_parameters = data[i].no_of_parameters;
+            var parameters = data[i].parameters;
+            var glens_id = data[i].glens_id;
+
+            stationsdata.innerHTML += "<tr roll =\"row\" class =\"odd\"> <td>"+industry_name+"</td> <td>"+industry_cat+"</td> <td>"+industry_type+"</td> <td>"+industry_mis_id+"</td> <td>"+industry_mis_id+"</td> <td>"+site_address+"</td> <td> <label class=\"badge badge-info\">On hold</label> </td> <td> <button class=\"btn btn-outline-primary\">View</button> </td> </tr>";
+        }
+
+    }
+
+  function innerStationsdata($result){
+
+        var result = $result;
+              var j =0;
+             var innerstationsdata = document.getElementById('innerstationsdata');
+
+        data = result.data
+        var data_length = data.length
+        for (i=0;i<data_length;i++) {
+
+            var analyser_id = data[i].analyser_id;
+            var station_id = data[i].station_id;
+            var parameter = data[i].parameter;
+            var unit = data[i].unit;
+            var process_value = data[i].process_value;
+
+            innerstationsdata.innerHTML += "<div class=\"col-md-6 col-lg-6 col-xl-4 grid-margin stretch-card\"> <div class=\"card\"> <a href=\""+analyser_id+"\"> <div class=\"card-body\"> <style> td{ border: 1px solid #ececec; padding: 8px; } </style> <h3 style=\" margin: 14px;font-size: 17px; color: #5542b9; height: 29px; \"> "+station_id+"</h3> <table style=\"width: 100%;color: black; box-shadow: 0px 0px 5px #c1c1c1 inset;\"> <tr> <td><b>Analyser Id:</b></td> <td>"+analyser_id+"</td> </tr> <tr> <td><b>Parameter:</b></td> <td>"+parameter+"</td> </tr> <tr> <td><b>Process Value Id:</b></td> <td>"+process_value+"</td> </tr> <tr> <td><b>Unit:</b></td> <td>"+unit+"</td> </tr> </table> </div> </a> </div> </div>";
+
+
+               }
+
+    }
+
+  function readingsdata($result) {
+
+
+      var result = $result;
+      var j = 0;
+      var readingsdata = document.getElementById('readingsdata');
+
+      data = result
+
+
+      var data_length = data.length;
+       for (k=0;k<data_length;k++) {
+
+      try {
+          var analyser_length = data[k].analyser_id.length;
+          for (i = 0; i < analyser_length; i++) {
+              var analyser_id = data[k].analyser_id[i];
+
+              for (j = 0; j < data[k].parameter_id[i].length; j++) {
+                  var parameter = data[k].parameter_id[i][j];
+                  var readings = data[k].reading[i][j];
+                  var id = "value_reading" + analyser_id + "_" + parameter;
+                  var coloridiv = "value_reading_color_div" + analyser_id + "_" + parameter;
+                  var colorh1 = "value_reading_color_h1" + analyser_id + "_" + parameter;
+                  document.getElementById(id).innerHTML = "";
+
+                  var update_value_div = document.getElementById(id);
+                  var colorid_div = document.getElementById(coloridiv);
+                  var colorid_h1 = document.getElementById(colorh1);
+                  try {
+
+                      update_value_div.innerHTML = readings;
+                      colorid_h1.style.color = '#3498db';
+                      colorid_div.style.borderColor  = '#ffffff';
+                      // update_value_div.style.color = '#3498db';
+                  } catch (e) {
+                      update_value_div.innerHTML = "-NA-";
+                  }
+              }
+          }
+      } catch (e) {
+
+      }
+  }
+// }
+
+//         for (i=0;i<data_length;i++) {
+//             console.log("readingsdata-7777777777777777--");
+//
+//
+//
+//             var station_id = data[i].station_id;
+//             var analyser_id = data[i].analyser_id;
+//             // var station_id = (data[i].station_id).slice(0, -39);
+//             // var parameter = data[i].parameter_id;
+//             // var unit = "mg/Nm3";
+//             console.log("readingsdata-7777777777777777--"+analyser_id);
+//             var process_value = data[i].reading;
+//
+//             var update_value_div = document.getElementById('value_reading'+analyser_id)
+//             try {
+//                 update_value_div.innerHTML = process_value;
+//             }catch (e){
+//                 // update_value_div.innerHTML = "";
+//             }
+// // ss
+//
+//
+//                }
+
+    }
+function logout() {
+    var cookies = document.cookie.split(";");
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i];
+            var eqPos = cookie.indexOf("=");
+            var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+            document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        }
+        sessionStorage.clear();
+        localStorage.clear();
+        indexedDB.databases().then(dbs => {
+          dbs.forEach(db => indexedDB.deleteDatabase(db.name))
+        });
+        var transaction = db.transaction(["userdata"], "readwrite");
+        var objectStore = transaction.objectStore("userdata");
+        var objectStoreRequest = objectStore.clear();
+        objectStoreRequest.onsuccess = function(event) {
+            // report the success of our request
+
+          };
+
+}
+
+
+function downloadindustryreport($result){
+    var url = search_params.get('url');
+
+
+    var result = $result;
+    var j =0;
+    var industrydownloadgenerate = document.getElementById('industrydownloadgenerate');
+
+
+    data = result
+    // console.log("download data--"+JSON.stringify(data));
+
+    var data_length = data.length;
+    var m = 0;
+    for (i=0;i<data_length;i++) {
+
+        var analyser_id = data[i].analyser_id;
+        var station_id = (data[i].station_id).slice(0, -11);
+        var parameter = data[i].parameter_id;
+
+        var unit = "mg/Nm3";
+        var unit1 = "";
+        try{
+            unit1 = data[i].unit;
+        }catch(e){
+            if(parameter='SPM') {
+                unit = "mg/Nm3";
+            }else if(parameter='NOX'){
+                unit = "PPM";
+            }else if(parameter='CO'){
+                unit = "PPM";
+            }else if(parameter='SOX'){
+                unit = "PPM";
+            }
+        }
+
+        var process_value = data[i].reading;
+        var datentime = data[i].datentime;
+
+             for (k=0;k<analyser_id.length;k++){
+
+            for (l=0;l<parameter[k].length;l++){
+
+
+                if(url != "graph_view") {
+                    try{
+                        unit = unit1[k][l];
+                    }catch(e){
+                        if(parameter[k][l] != "SPM"){
+                            unit = "PPM";
+                        }else{
+                            unit = "mg/Nm3";
+                        }
+                    }
+                    m++;
+                    industrydownloadgenerate.innerHTML += "<tr  roll =\"row\" class =\"odd\"><td>" + m + "</td><td>" + station_id + "</td><td>" + parameter[k][l] + "</td><td>" + process_value[k][l] + "</td><td>" + /*unit[k][l]*/unit + "</td><td>" + datentime + "</td></tr>";
+                }
+            }
+        }
+
+
+    }
+      if(url != "graph_view") {
+          document.getElementById('loader1').style.display = "none";
+        var readingstationdata = document.getElementById('script_c');
+        readingstationdata.innerHTML = "<script>(function($) { 'use strict'; $(function() { $('#order-listing').DataTable({ \"aLengthMenu\": [ [5, 10, 15, -1], [5, 10, 15, \"All\"] ], \"iDisplayLength\": 10, \"language\": { search: \"\" } }); $('#order-listing').each(function() { var datatable = $(this); var search_input = datatable.closest('.dataTables_wrapper').find('div[id$=_filter] input'); search_input.attr('placeholder', 'Search'); search_input.removeClass('form-control-sm'); var length_sel = datatable.closest('.dataTables_wrapper').find('div[id$=_length] select'); length_sel.removeClass('form-control-sm'); }); }); })(jQuery);<\/script>"
+        var newScript = document.createElement("script");
+        var inlineScript = document.createTextNode("test();");
+        newScript.appendChild(inlineScript);
+        document.body.appendChild(newScript);
+    }
+
+
+  }
+
+function downloadgenerate($result){
+    var url = search_params.get('url');
+
+
+    var result = $result;
+    var j =0;
+    var downloadgenerate = document.getElementById('downloadgenerate');
+
+
+    data = result
+    // console.log("download data--"+JSON.stringify(data));
+
+    var data_length = data.length;
+    var m = 0;
+    for (i=0;i<data_length;i++) {
+
+        var analyser_id = data[i].analyser_id;
+        var station_id = (data[i].station_id).slice(0, -11);
+        var parameter = data[i].parameter_id;
+
+        var unit = "mg/Nm3";
+        var unit1 = "";
+        try{
+            unit1 = data[i].unit;
+        }catch(e){
+            if(parameter='SPM') {
+                unit = "mg/Nm3";
+            }else if(parameter='NOX'){
+                unit = "PPM";
+            }else if(parameter='CO'){
+                unit = "PPM";
+            }else if(parameter='SOX'){
+                unit = "PPM";
+            }
+        }
+
+        var process_value = data[i].reading;
+        var datentime = data[i].datentime;
+
+             for (k=0;k<analyser_id.length;k++){
+
+            for (l=0;l<parameter[k].length;l++){
+
+
+                if(url != "graph_view") {
+                    try{
+                        unit = unit1[k][l];
+                    }catch(e){
+                        if(parameter[k][l] != "SPM"){
+                            unit = "PPM";
+                        }else{
+                            unit = "mg/Nm3";
+                        }
+                    }
+                    m++;
+                    downloadgenerate.innerHTML += "<tr  roll =\"row\" class =\"odd\"><td>" + m + "</td><td>" + station_id + "</td><td>" + parameter[k][l] + "</td><td>" + process_value[k][l] + "</td><td>" + /*unit[k][l]*/unit + "</td><td>" + datentime + "</td></tr>";
+                }
+            }
+        }
+
+
+    }
+      if(url != "graph_view") {
+          document.getElementById('loader1').style.display = "none";
+        var readingstationdata = document.getElementById('script_c');
+        readingstationdata.innerHTML = "<script>(function($) { 'use strict'; $(function() { $('#order-listing').DataTable({ \"aLengthMenu\": [ [5, 10, 15, -1], [5, 10, 15, \"All\"] ], \"iDisplayLength\": 10, \"language\": { search: \"\" } }); $('#order-listing').each(function() { var datatable = $(this); var search_input = datatable.closest('.dataTables_wrapper').find('div[id$=_filter] input'); search_input.attr('placeholder', 'Search'); search_input.removeClass('form-control-sm'); var length_sel = datatable.closest('.dataTables_wrapper').find('div[id$=_length] select'); length_sel.removeClass('form-control-sm'); }); }); })(jQuery);<\/script>"
+
+        var newScript = document.createElement("script");
+        var inlineScript = document.createTextNode("test();");
+        newScript.appendChild(inlineScript);
+        document.body.appendChild(newScript);
+    }
+
+
+  }
+ function readingstationdata($result){
+    var url = search_params.get('url');
+
+
+    var result = $result;
+    var j =0;
+    var readingstationdata = document.getElementById('readingstationdata');
+
+
+    data = result
+
+
+    var data_length = data.length;
+    // var analyser_id1 = data.analyser_id;
+    var analyser_id1 =[];
+    // var station_id1 = data.station_id;
+    var station_id1 = [];
+    var process_value1 = [];
+    var datentime1 = [];
+    var j=0;
+
+    var all_process_value = [];
+    for (i=0;i<data_length;i++) {
+
+        var analyser_id = data[i].analyser_id;
+        var station_id = (data[i].station_id).slice(0, -11);
+        var parameter = data[i].parameter_id;
+        var unit = "mg/Nm3";
+        var unit1 = "";
+        try{
+            unit1 = data[i].unit;
+        }catch(e){
+            unit = "mg/Nm3";
+        }
+
+        var process_value = data[i].reading;
+        var datentime = data[i].datentime;
+
+
+        // process_value1.push(process_value);
+        // datentime1.push(datentime);
+        // analyser_id1.push(analyser_id);
+        // station_id1.push(station_id);
+
+
+        datentime1.push(datentime);
+
+        var all_parameter = [];
+
+        for (k=0;k<analyser_id.length;k++){
+
+            for (l=0;l<parameter[k].length;l++){
+
+
+
+                try{
+                    all_parameter.push(parameter[k][l])
+                    all_process_value.push(process_value[k][l])
+
+                }catch (e){
+
+                }
+
+                var analyser_display = "-NA-";
+                var parameter_display = "-NA-";
+                var process_value_display = "-NA-";
+
+                try {
+                    analyser_display = analyser_id[k];
+                    parameter_display = parameter[k][l];
+                    process_value_display = process_value[k][l];
+                }catch (e){
+
+                }
+
+                j++;
+                if(url != "graph_view") {
+                    try{
+                        unit = unit1[k][l];
+                    }catch(e){
+                        if(parameter[k][l] != "SPM"){
+                            unit = "PPM";
+                        }else{
+                            unit = "mg/Nm3";
+                        }
+                    }
+                    readingstationdata.innerHTML += "<tr  roll =\"row\" class =\"odd\"><td>" + j + "</td><td>" + station_id + "</td><td>" + parameter_display + "</td><td>" + process_value_display + "</td><td>" + /*unit[k][l]*/unit + "</td><td>" + datentime + "</td></tr>";
+                }
+            }
+        }
+        // if(url != "graph_view"){
+        //     readingstationdata.innerHTML += "<tr  roll =\"row\" class =\"odd\"><td>"+j+"</td><td>"+station_id+"</td><td>"+analyser_id+"</td><td>"+parameter+"</td><td>"+process_value+"</td><td>"+unit+"</td><td>"+datentime+"</td></tr>";
+        // }
+
+    }
+
+     if(url == "graph_view") {
+         graph(all_parameter, station_id, all_process_value, datentime1);
+     }
+   if(url != "graph_view") {
+
+
+           if(all_parameter == '' || all_parameter == null || all_parameter == undefined){
+               var  lenthdaparam = 0;
+            }else{
+                lenthdaparam = all_parameter.length;
+            }
+       for (i=0;i<lenthdaparam;i++){
+
+           document.getElementById('insertParams').innerHTML +="<button onclick=\"myParameters(this.id)\" id='"+all_parameter[i]+"' type=\"button\" class=\"dt-button buttons-html5\" style=\"float: right;\">"+all_parameter[i]+"</button>";
+       }
+
+       document.getElementById('loader').style.display = "none";
+        var readingstationdata = document.getElementById('script_c');
+        readingstationdata.innerHTML = "<script>(function($) { 'use strict'; $(function() { $('#order-listing').DataTable({ \"aLengthMenu\": [ [5, 10, 15, -1], [5, 10, 15, \"All\"] ], \"iDisplayLength\": 10, \"language\": { search: \"\" } }); $('#order-listing').each(function() { var datatable = $(this); var search_input = datatable.closest('.dataTables_wrapper').find('div[id$=_filter] input'); search_input.attr('placeholder', 'Search'); search_input.removeClass('form-control-sm'); var length_sel = datatable.closest('.dataTables_wrapper').find('div[id$=_length] select'); length_sel.removeClass('form-control-sm'); }); }); });(jQuery);<\/script>"
+        var newScript = document.createElement("script");
+        var inlineScript = document.createTextNode("test();");
+        var searchParam = search_params.get('parameters')
+        var inlineScript1 = document.createTextNode("myParameters('"+searchParam+"');");
+        newScript.appendChild(inlineScript);
+        newScript.appendChild(inlineScript1);
+        document.body.appendChild(newScript);
+    }
+
+
+  }
+
+function graph(all_parameter,station_id,all_process_value,datentime1) {
+
+
+    document.getElementById('chart_name').innerHTML = station_id;
+
+
+//         var data_array = []
+//         var k = 0;
+//         for (i=0;i<datentime1.length;i++){
+//             var data_object = {};
+//             data_object['y'] = datentime1[i];
+//             console.log("all_parameter"+all_parameter.length+"--"+k)
+//             for (j=0;j<all_parameter.length;j++){
+//                 data_object[all_parameter[j]] = all_process_value[k];
+//                 console.log("all_parameter[j]"+all_parameter[j]+k)
+//                 k++;
+//             }
+//             data_array.push(data_object)
+//         }
+// console.log("data_array"+JSON.stringify(data_array))
+
+    //
+    //   if ($('#morris-line-example').length) {
+    //   Morris.Line({
+    //     element: 'morris-line-example',
+    //     lineColors: ['#63CF72', '#F36368', '#76C1FA', '#FABA66', '#EE82EE', '#FF7F50', '#6495ED','#DC143C', '#00008B', '#008B8B', '#006400','#FF1493', '#696969', '#DAA520', '#4B0082', '#ADFF2F', '#ADFF2F', '#ADFF2F', '#CD5C5C', '#ADD8E6'],
+    //     data: data_array,
+    //     xkey: 'y',
+    //     ykeys: all_parameter,
+    //     labels: all_parameter
+    //   });
+    // }
+// }
+
+
+
+    var labels_array = [];
+    var k = 0;
+    for (i=0;i<datentime1.length;i++){
+        labels_array.push(datentime1[i].slice(11,16));
+
+    }
+
+    var data_array = [];
+    var data_object = {};
+    var param_value = [];
+    var m = 0;
+    for (j=0;j<all_parameter.length;j++){
+        data_object = {};
+
+        // data_object[all_parameter[j]] = all_process_value[k];
+        data_object['label'] = all_parameter[j];
+
+        m = j;
+        for (i=0;i<datentime1.length;i++){
+
+            // if(i%4 == 0){
+            //     all_process_value[m] = null;
+            // }
+
+            try {
+               param_value[j].push(all_process_value[m]) ;
+            }catch (e){
+                param_value.push([]);
+                try{
+                    param_value[j].push(all_process_value[m]);
+                }catch (e){}
+            }
+            m = m+all_parameter.length
+
+        }
+
+        var randomcolor = Math.floor(Math.random()*16777215).toString(16);
+
+        k++;
+        data_object['borderColor'] = ["#"+randomcolor+"fa"];
+        data_object['backgroundColor'] = ["#"+randomcolor+"20"];
+        data_object['data'] = param_value[j];
+        data_object['borderWidth'] = 2;
+        data_object['fill'] = false;
+
+
+        data_array.push(data_object)
+
+    }
+
+var currentDate = moment(new Date()).add(15, 'minutes');
+
+    $( document ).ready(function() {
+        graph_inline(labels_array, data_array);
+    });
+
+}
+
+function resetZoomChart() {
+  // body...
+  myChart.resetZoom();
+}
+
+
+
+function insertUserdata($result){
+
+
+        var result = $result;
+
+        var j =0;
+
+
+        let tx = db.transaction(['userdata'], 'readwrite');
+        let store = tx.objectStore('userdata');
+        // Put the sticky note into the object store
+
+        // data = result[0].no_of_parameters
+        // var data_length = data.length
+        // for (i=0;i<data_length;i++) {
+        //     i = 0;
+        //   console.log(i);
+        //     var no_of_parameters = result[0].no_of_parameters;
+        //     // alert(no_of_parameters);
+        //     var station_id = result[0].station_id;
+        //     var industry_cat = result[0].industry_cat;
+        //     var email = result[0].email;
+        //     var state = result[0].state;
+        //     var city = result[0].city;
+        //     var password = result[0].password;
+        //     var mobile = result[0].mobile;
+        //     var industry_type = result[0].industry_type;
+        //     var parameters = result[0].parameters;
+        //     var user_name = result[0].user_name;
+        //     var contact_name = result[0].contact_name;
+        //     var pincode = result[0].pincode;
+        //     var industry_name = result[0].industry_name;
+        //     var stack_name = result[0].stack_name;
+        //     var designation = result[0].designation;
+        //     var sort_key = result[0].sort_key;
+        //     var industry_id = result[0].industry_id;
+        //     var glens_id = result[0].glens_id;
+        //     var analyser_id = result[0].analyser_id;
+        //     var district = result[0].district;
+        //     var site_address = result[0].site_address;
+        //     var industry_mis_id = result[0].industry_mis_id;
+        //     var installed_pc = result[0].installed_pc;
+        //     var monitoring_id = result[0].monitoring_id;
+
+            // let note = {no_of_parameters:no_of_parameters, station_id:station_id, industry_cat:industry_cat,
+            //     email:email, state:state, city:city,password:password,mobile:mobile,
+            //     industry_type:industry_type,parameters:parameters,user_name:user_name,
+            //     contact_name:contact_name,pincode:pincode,industry_name:industry_name,
+            //     stack_name:stack_name,designation:designation,sort_key:sort_key,
+            //     industry_id:industry_id,glens_id:glens_id,analyser_id:analyser_id,
+            //     district:district,site_address:site_address,industry_mis_id:industry_mis_id,
+            //     installed_pc:installed_pc,monitoring_id:monitoring_id};
+
+
+            store.add(result);
+
+            // Wait for the database transaction to complete
+            tx.oncomplete = function() {
+                window.location.href = "https://vasthienviro.com?url=dashboard";
+            }
+
+            tx.onerror = function(event) {
+                alert('error storing note ' + event.target.errorCode);
+            }
+
+
+        // }
+
+    }
+
+
+
+function fetchIndustryId(){
+    let tx = db.transaction(['userdata'], 'readonly');
+    let store = tx.objectStore('userdata');
+
+    let userdata = [];
+    let req = store.openCursor();
+    req.onsuccess = function(event) {
+        // The result of req.onsuccess is an IDBCursor
+        let cursor = event.target.result;
+        if (cursor != null) {
+          // If the cursor isn't null, we got an IndexedDB item.
+          // Add it to the note array and have the cursor continue!
+
+          userdata.push(cursor.value);
+          cursor.continue();
+        } else {
+
+            var userdatadetails = userdata[0];
+            var each_subject = JSON.stringify(userdatadetails);
+            var userdatadetailsmain = JSON.parse(each_subject);
+
+            var user_main_details = document.getElementById("stationlist");
+
+            var row = userdatadetailsmain;
+            var industry_id = row['industry_id'];
+        }
+    }
+    req.onerror = function(event) {
+        alert('error in cursor request ' + event.target.errorCode);
+    }
+}
+
+function displaystationall1(){
+
+    let tx = db.transaction(['userdata'], 'readonly');
+    let store = tx.objectStore('userdata');
+
+    let userdata = [];
+    let req = store.openCursor();
+    req.onsuccess = function(event) {
+        // The result of req.onsuccess is an IDBCursor
+        let cursor = event.target.result;
+        if (cursor != null) {
+          // If the cursor isn't null, we got an IndexedDB item.
+          // Add it to the note array and have the cursor continue!
+
+          userdata.push(cursor.value);
+          cursor.continue();
+        } else {
+
+            // displaySingleReadings(userdata);
+            // displaystationcount(userdata);
+            displaystationalldata(userdata);
+            // displaylicense(userdata);
+        }
+    }
+    req.onerror = function(event) {
+        alert('error in cursor request ' + event.target.errorCode);
+    }
+}
+function showSingleReadingslicense(){
+
+    let tx = db.transaction(['userdata'], 'readonly');
+    let store = tx.objectStore('userdata');
+
+    let userdata = [];
+    let req = store.openCursor();
+    req.onsuccess = function(event) {
+        // The result of req.onsuccess is an IDBCursor
+        let cursor = event.target.result;
+        if (cursor != null) {
+          // If the cursor isn't null, we got an IndexedDB item.
+          // Add it to the note array and have the cursor continue!
+
+          userdata.push(cursor.value);
+          cursor.continue();
+        } else {
+
+            // displaySingleReadings(userdata);
+            // displaystationcount(userdata);
+            // displaystationalldata(userdata);
+            displaylicense(userdata);
+        }
+    }
+    req.onerror = function(event) {
+        alert('error in cursor request ' + event.target.errorCode);
+    }
+}
+
+function industrydetails(){
+
+    let tx = db.transaction(['userdata'], 'readonly');
+    let store = tx.objectStore('userdata');
+
+    let userdata = [];
+    let req = store.openCursor();
+    req.onsuccess = function(event) {
+        // The result of req.onsuccess is an IDBCursor
+        let cursor = event.target.result;
+        if (cursor != null) {
+          // If the cursor isn't null, we got an IndexedDB item.
+          // Add it to the note array and have the cursor continue!
+
+          userdata.push(cursor.value);
+          cursor.continue();
+        } else {
+
+            // displaySingleReadings(userdata);
+            // displaystationcount(userdata);
+            industryreport(userdata);
+
+        }
+    }
+    req.onerror = function(event) {
+        alert('error in cursor request ' + event.target.errorCode);
+    }
+}
+
+function extraoptions(db){
+    let tx = db.transaction(['userdata'], 'readonly');
+    let store = tx.objectStore('userdata');
+
+    let userdata = [];
+    let req = store.openCursor();
+    req.onsuccess = function(event) {
+        // The result of req.onsuccess is an IDBCursor
+        let cursor = event.target.result;
+        if (cursor != null) {
+          // If the cursor isn't null, we got an IndexedDB item.
+          // Add it to the note array and have the cursor continue!
+
+          userdata.push(cursor.value);
+          cursor.continue();
+        } else {
+
+            // displaySingleReadings(userdata);
+            // displaystationcount(userdata);
+            extraoptionsdashboard(userdata,db);
+
+        }
+    }
+    req.onerror = function(event) {
+        alert('error in cursor request ' + event.target.errorCode);
+    }
+}
+function showSingleReport(){
+
+    let tx = db.transaction(['userdata'], 'readonly');
+    let store = tx.objectStore('userdata');
+
+    let userdata = [];
+    let req = store.openCursor();
+    req.onsuccess = function(event) {
+        // The result of req.onsuccess is an IDBCursor
+        let cursor = event.target.result;
+        if (cursor != null) {
+          // If the cursor isn't null, we got an IndexedDB item.
+          // Add it to the note array and have the cursor continue!
+            console.log(cursor.value);
+          userdata.push(cursor.value);
+          cursor.continue();
+        } else {
+
+            // displaySingleReadings(userdata);
+            // displaystationcount(userdata);
+            displayreportdownload(userdata);
+
+        }
+    }
+    req.onerror = function(event) {
+        alert('error in cursor request ' + event.target.errorCode);
+    }
+}
+
+function displaystationcount(userdata){
+
+
+
+    var userdatadetails = userdata[0];
+    var each_subject = JSON.stringify(userdatadetails);
+    var userdatadetailsmain = JSON.parse(each_subject);
+
+    var stationlist = document.getElementById("stationlist");
+
+    var row = userdatadetailsmain;
+    var analyser_id = row['analyser_id'];
+    var industry_id = row['industry_id'];
+    var station_id = row['station_id'];
+    for (let i = 0; i < analyser_id.length; i++) {
+
+           var station_id_main = row['station_id'][i];
+           var analyser_id_main = row['analyser_id'][i];
+           var parameters = row['parameters'][i];
+           var unit = "mg/Nm3";
+
+           stationlist.innerHTML += "<div class=\"col-md-6 col-lg-6 col-xl-4 grid-margin stretch-card\"> <div class=\"card\">  <div class=\"card-body\"> <style> td{ border: 1px solid #ececec; padding: 8px; } </style> <h3 style=\" margin: 14px;font-size: 17px; color: #5542b9; height: 29px; \">"+station_id_main+"</h3> <table style=\"width: 100%;color: black; box-shadow: 0px 0px 5px #c1c1c1 inset;\"> <tr> <td><b>Analyser Id:</b></td> <td>"+analyser_id_main+"</td> </tr> <tr> <td><b>Parameter:</b></td> <td>"+parameters+"</td> </tr> <tr> <td><b>Process Value Id:</b></td> <td id='"+analyser_id_main+"'></td> </tr> <tr> <td><b>Unit:</b></td> <td>"+unit+"</td> </tr> </table>   </div> <span>" +
+               "<center>  <a href='?url=readingdata&analyser_id="+analyser_id_main+"'><button class='btn'><i class='fa fa-table' style='display: block;margin: auto'></i> Table View</button></a> <a href='?url=graph_view&analyser_id="+analyser_id_main+"'><button class='btn'><i class='fa fa-area-chart'  style='display: block;margin: auto'></i> Graph View</button></a> </center>"+
+               "</span> </div> </div>";
+
+        }
+
+
+
+    data = {
+        cmd: "7",
+        analyser_id: analyser_id,
+        industry_id: industry_id,
+        station_id: station_id,
+        datentime: today,
+    }
+    sendRequest(data,7,0);
+
+}
+
+
+
+function displaylicense(userdata){
+
+
+        var userdatadetails = userdata[0][0];
+        var license = document.getElementById("license");
+
+        var email = userdatadetails['email'];
+        var stations = userdatadetails['stations'];
+        var analyser_details = userdatadetails['analyser_details'];
+        var industry_name = userdatadetails['industry_name'];
+
+
+
+        license.innerHTML += "<div class=\"col-md-12 grid-margin stretch-card\"> \n" +
+            "                <div class=\"card \">\n" +
+            "                 <div class=\"row\" style='width: 100%;'> \n" +
+            "                    <div class=\"col-md-12\"> \n" +
+            "                        <div class=\"card-body\"> \n" +
+            "                            <h4 class=\"card-title\">license Details</h4> \n" +
+            "\n" +
+            "             \n" +
+            "             <div class=\"form-group row\"> \n" +
+            "                <label class=\"col-sm-4 col-form-label\">Name of the Industry</label>\n" +
+            "                 <div class=\"col-sm-8\"> \n" +
+            "                    <p>"+industry_name+"</p> \n" +
+            "                </div> \n" +
+            "            </div>\n" +
+            "             <div class=\"form-group row\">\n" +
+            "              <label class=\"col-sm-4 col-form-label\">License Expiry Date</label> \n" +
+            "              <div class=\"col-sm-8\"> \n" +
+            "                <p></p>\n" +
+            "                </div> \n" +
+            "            </div>\n" +
+             "             <div class=\"form-group row\"> \n" +
+            "                 <div class=\"col-sm-12\"> \n" +
+            "                    <div style='text-align: center'> <a style=\" width: 400px; background-color: #5C68D8; text-align: center; font-weight: 800; padding: 11px 0px; color: white; font-size: 12px; display: inline-block; text-decoration: none; \" href='https://pmny.in/AI9ePkXHgyXh' >Renew License </a> </div>\n" +
+            "                </div> \n" +
+            "            </div>\n" +
+            "              </div>\n" +
+            "              </div></div></div></div>";
+
+
+
+    }
+function industryreport(userdata){
+
+
+        var userdatadetails = userdata[0][0];
+        var industry_report = document.getElementById("industry_report");
+
+
+        var stations = userdatadetails['stations'];
+        var analyser_details = userdatadetails['analyser_details'];
+        var industry_name = userdatadetails['industry_name'];
+        var industry_id = userdatadetails['industry_id'];
+
+
+
+        industry_report.innerHTML += "<form  onsubmit=\"return reportRequestmain()\" style='width: 100%'><div class=\"col-md-12 grid-margin stretch-card\"> \n" +
+            "                <div class=\"card \">\n" +
+            "                 <div class=\"row\" style='width: 100%;'> \n" +
+            "                    <div class=\"col-md-12\"> \n" +
+            "                        <div class=\"card-body\"> \n" +
+            "                            <h4 class=\"card-title\">Download Report</h4> \n" +
+            "             <div class=\"form-group row\"> \n" +
+            "                <h3>"+industry_name+"</h3> <input type='hidden' name='url' value='industry_report_page'>\n" +
+            "            </div>\n" +
+            "             <div class=\"form-group row\">\n" +
+            "              <label class=\"col-sm-4 col-form-label\">From Date</label> \n" +
+            "              <div class=\"col-sm-8\"> \n" +
+            "                <input type='date' class='form-control' name='fromdate' id='fromdate' required>" +
+            "       <input type='hidden' value='"+industry_id+"' name='industry_id' id='industry_id' >\n" +
+            "                </div> </div>\n" +
+            "             <div class=\"form-group row\">\n" +
+            "              <label class=\"col-sm-4 col-form-label\">To Date</label> \n" +
+            "              <div class=\"col-sm-8\"> \n" +
+            "                <input type='date' class='form-control' name='todate' id='todate' required>\n" +
+            "                </div> \n" +
+            "            </div>\n" +
+            "             <div class=\"form-group row\">\n" +
+            "              <label class=\"col-sm-4 col-form-label\">Average</label> \n" +
+            "              <div class=\"col-sm-8\"> \n" +
+            "                <input type='number' required class='form-control' id='average' name='average' style='width: 50%;display: inline-block'>\n" +
+            "<select class='form-control' style='width: 37%;display: inline-block' id='unit' required><option>--Select Unit--</option><option value='hour'>Hour</option><option style='minutes'>Minutes</option></select>"+
+            "                </div> \n" +
+            "            </div></div>\n" +
+             "             <div class=\"form-group row\"> \n" +
+            "                 <div class=\"col-sm-12\"> \n" +
+            "                    <div style='text-align: center'> <button class='btn btn-success' type='submit'>Submit</button> </div>\n" +
+            "                </div> \n" +
+            "            </div>\n" +
+            "              </div></div>\n" +
+            "              </div></div></div></div></form>";
+
+
+    }
+function extraoptionsdashboard(userdata,db){
+
+    if(url != "login") {
+        var userdatadetails = userdata[0][0];
+
+
+        var camera = userdatadetails['camera'];
+        var remote_calibration = userdatadetails['remote_calibration'];
+        var schedule = userdatadetails['schedule'];
+        var industry_name = userdatadetails['industry_name'];
+        var industry_id = userdatadetails['industry_id'];
+
+        var headersitename = document.getElementById("sitenameheader");
+
+        headersitename.innerHTML = "" + industry_name + "";
+
+        if (url == 'dashboard') {
+
+            var cameradata = document.getElementById("camera");
+            var remote_calibrationdata = document.getElementById("remotecalibration");
+            var scheduledata = document.getElementById("schedule");
+
+
+
+            cameradata.innerHTML += "<div class=\"card\" >\n" +
+                "                <div class=\"card-body\">\n" +
+                "                  <a href=\"http://stream.vasthienviro.com/env/stream/stream.php?site_id="+industry_id+"_1\" style=\"display: contents;\"  id =\"camera1\" target=\"_blank\">\n" +
+                "\n" +
+                "                  <div class=\"d-flex justify-content-between align-items-center\">\n" +
+                "                    <div class=\"icon-wrap\">\n" +
+                "                     \n" +
+                "                      <img src=\"https://vasthienviro.s3.ap-south-1.amazonaws.com/images/sa/camera.png\" style=\"height: 57%;\">\n" +
+                "                    </div>\n" +
+                "                    <div class=\"flex-right-height\">\n" +
+                "                     \n" +
+                "                      <h3>Camera</h3>\n" +
+                "                 \n" +
+                "                    </div>\n" +
+                "                    <div class=\"dropdown\">\n" +
+                "                          <button class=\"btn btn-outline-light btn-sm dropdown-toggle text-dark text-small\" type=\"button\"  data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">\n" +
+                "                          \n" +
+                "                          </button>\n" +
+                "                         \n" +
+                "                        </div>\n" +
+                "                  </div>\n" +
+                "                  </a>\n" +
+                "                </div>\n" +
+                "              </div>";
+            remote_calibrationdata.innerHTML += "<div class=\"card\" >\n" +
+                "                <div class=\"card-body\">\n" +
+                "                  <a href=\"http://13.232.126.200/env/remote_calibration.php?site_id="+industry_id+"\" style=\"display: contents;\" id =\"remotecalibration1\">\n" +
+                "\n" +
+                "                  <div class=\"d-flex justify-content-between align-items-center\">\n" +
+                "                    <div class=\"icon-wrap\">\n" +
+                "                      \n" +
+                "                      <img src=\"https://vasthienviro.s3.ap-south-1.amazonaws.com/images/sa/computer.svg\" style=\"height: 57%;\">\n" +
+                "                    </div>\n" +
+                "                    <div class=\"flex-right-height\">\n" +
+                "                   \n" +
+                "                      <h3>Remote Calibration</h3>\n" +
+                "                 \n" +
+                "                    </div>\n" +
+                "                    <div class=\"dropdown\">\n" +
+                "                          <button class=\"btn btn-outline-light btn-sm dropdown-toggle text-dark text-small\" type=\"button\"  data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">\n" +
+                "                           \n" +
+                "                          </button>\n" +
+                "                        \n" +
+                "                        </div>\n" +
+                "                  </div>\n" +
+                "                  </a>\n" +
+                "                </div>\n" +
+                "              </div>";
+            scheduledata.innerHTML += "<div class=\"card\" >\n" +
+                "                <div class=\"card-body\">\n" +
+                "                  <a href=\"http://13.232.126.200/env/schedule_calibration.php?site_id="+industry_id+"\" style=\"display: contents;\" id =\"schedule1\">\n" +
+                "\n" +
+                "                  <div class=\"d-flex justify-content-between align-items-center\">\n" +
+                "                    <div class=\"icon-wrap\">\n" +
+                "                   \n" +
+                "                      <img src=\"https://vasthienviro.s3.ap-south-1.amazonaws.com/images/sa/iconfinder_simpline_26_2305596.svg\" style=\"height: 57%;\">\n" +
+                "                    </div>\n" +
+                "                    <div class=\"flex-right-height\">\n" +
+                "                      \n" +
+                "                      <h3>Schedule</h3>\n" +
+                "                   \n" +
+                "                    </div>\n" +
+                "                    <div class=\"dropdown\">\n" +
+                "                          <button class=\"btn btn-outline-light btn-sm dropdown-toggle text-dark text-small\" type=\"button\"  data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">\n" +
+                "                       \n" +
+                "                          </button>\n" +
+                "                         \n" +
+                "                        </div>\n" +
+                "                  </div>\n" +
+                "                  </a>\n" +
+                "                </div>\n" +
+                "              </div>";
+        }
+
+        try {
+            if (remote_calibration == 'yes') {
+
+
+                document.getElementById("remotecalibration").style.cursor = "pointer";
+                document.getElementById("calibrationnav").style.cursor = "pointer";
+
+
+            } else {
+
+
+                document.getElementById("remotecalibration").style.cursor = "no-drop";
+                document.getElementById("remotecalibration1").style.color = "black";
+                document.getElementById("remotecalibration1").style.pointerEvents = "none";
+                document.getElementById("remotecalibration1").style.cursor = "no-drop"
+                document.getElementById("calibrationnav").style.cursor = "no-drop";
+                document.getElementById("calibrationnav1").style.cursor = "no-drop";
+                document.getElementById("calibrationnav1").style.pointerEvents = "none";
+
+            }
+            if (schedule == 'yes') {
+
+
+                document.getElementById("schedulenav").style.cursor = "pointer";
+                document.getElementById("schedule").style.cursor = "pointer";
+
+
+            } else {
+                document.getElementById("schedule").style.cursor = "no-drop";
+                document.getElementById("schedule1").style.color = "black";
+                document.getElementById("schedule1").style.pointerEvents = "none";
+                document.getElementById("schedule1").style.cursor = "no-drop"
+                document.getElementById("schedulenav").style.cursor = "no-drop";
+                document.getElementById("schedulenav1").style.cursor = "no-drop";
+                document.getElementById("schedulenav1").style.pointerEvents = "none";
+            }
+            if (camera == 'yes') {
+                var cameradatanav = document.getElementById("cameranav");
+
+
+                cameradatanav.innerHTML += " <a href=\"http://stream.vasthienviro.com/env/stream/stream.php?site_id="+industry_id+"_1\" id=\"cameranav1\">\n" +
+                    "    <img src=\"https://vasthienviro.s3.ap-south-1.amazonaws.com/images/sa/new/camera.png\" style=\"height: 29px;cursor: no-drop\">\n" +
+                    "                        <span class=\"nav-text\">\n" +
+                    "                           Camera\n" +
+                    "                        </span>\n" +
+                    "                    </a>";
+
+                document.getElementById("camera").style.cursor = "pointer";
+                document.getElementById("cameranav").style.cursor = "pointer";
+
+
+
+            } else {
+                document.getElementById("camera").style.cursor = "no-drop";
+                document.getElementById("camera1").style.color = "black";
+                document.getElementById("camera1").style.cursor = "no-drop";
+                document.getElementById("camera1").style.pointerEvents = "none";
+                document.getElementById("cameranav").style.cursor = "no-drop";
+                document.getElementById("cameranav1").style.cursor = "no-drop";
+                document.getElementById("cameranav1").style.pointerEvents = "none";
+            }
+        } catch (e) {
+            try {
+                if (remote_calibration == 'yes') {
+                    document.getElementById("calibrationnav").style.cursor = "pointer";
+                } else {
+                    document.getElementById("calibrationnav").style.cursor = "no-drop";
+                    document.getElementById("calibrationnav1").style.cursor = "no-drop";
+                    document.getElementById("calibrationnav1").style.pointerEvents = "none";
+
+                }
+                if (schedule == 'yes') {
+
+                    document.getElementById("schedulenav").style.cursor = "pointer";
+                } else {
+                    document.getElementById("schedulenav").style.cursor = "no-drop";
+                    document.getElementById("schedulenav1").style.cursor = "no-drop";
+                    document.getElementById("schedulenav1").style.pointerEvents = "none";
+                }
+                if (camera == 'yes') {
+                     var cameradatanav = document.getElementById("cameranav");
+
+
+                    cameradatanav.innerHTML += " <a href=\"http://stream.vasthienviro.com/env/stream/stream.php?site_id="+industry_id+"_1\" id=\"cameranav1\">\n" +
+                        "    <img src=\"https://vasthienviro.s3.ap-south-1.amazonaws.com/images/sa/new/camera.png\" style=\"height: 29px;cursor: no-drop\">\n" +
+                        "                        <span class=\"nav-text\">\n" +
+                        "                           Camera\n" +
+                        "                        </span>\n" +
+                        "                    </a>";
+
+                    document.getElementById("cameranav").style.cursor = "pointer";
+
+                } else {
+                    document.getElementById("cameranav").style.cursor = "no-drop";
+                    document.getElementById("cameranav1").style.cursor = "no-drop";
+                    document.getElementById("cameranav1").style.pointerEvents = "none";
+                }
+            } catch (e) {
+
+            }
+
+        }
+
+
+    }
+
+
+
+        checkTable(db);
+    }
+//fdkfkdsjfksdjfdk
+function displayreportdownload(userdata){
+
+
+        var userdatadetails = userdata[0][0];
+        var report_view = document.getElementById("report_view");
+
+
+        var stations = userdatadetails['stations'];
+        var analyser_details = userdatadetails['analyser_details'];
+        var industry_name = userdatadetails['industry_name'];
+        var industry_id = userdatadetails['industry_id'];
+
+
+
+        report_view.innerHTML += "<form  onsubmit=\"return reportRequestmain()\" style='width: 100%'><div class=\"col-md-12 grid-margin stretch-card\"> \n" +
+            "                <input id='inputParamField' name='parameter' type='hidden'><div class=\"card \">\n" +
+            "                 <div class=\"row\" style='width: 100%;'> \n" +
+            "                    <div class=\"col-md-12\"> \n" +
+            "                        <div class=\"card-body\"> \n" +
+            "                            <h4 class=\"card-title\">Download Report</h4> \n" +
+            "             <div class=\"form-group row\"> \n" +
+            "                <label class=\"col-sm-4 col-form-label\">Select the Station</label>\n" +
+            "                 <div class=\"col-sm-8\"> <input type='hidden' name='url' value='download_page'>\n" +
+            "                    <select class='form-control' name='station_id' id='stationdetails' required onchange=\"myFunctionsitesid()\"> </select>\n" +
+            "                </div> \n" +
+            "            </div><div class=\"form-group row\"><div class=\"col-sm-4\"></div><div class=\"col-sm-8\" id='parameters_list'></div></div>\n" +
+            "             <div class=\"form-group row\">\n" +
+            "              <label class=\"col-sm-4 col-form-label\">From Date</label> \n" +
+            "              <div class=\"col-sm-8\"> \n" +
+            "                <input type='date' class='form-control' name='fromdate' id='fromdate' required>" +
+            "       <input type='hidden' value='"+industry_id+"' name='industry_id' id='industry_id' >\n" +
+            "                </div> </div> </div>\n" +
+            "             <div class=\"form-group row\">\n" +
+            "              <label class=\"col-sm-4 col-form-label\">To Date</label> \n" +
+            "              <div class=\"col-sm-8\"> \n" +
+            "                <input type='date' class='form-control' name='todate' id='todate' required>\n" +
+            "                </div> \n" +
+            "            </div>\n" +
+            "             <div class=\"form-group row\">\n" +
+            "              <label class=\"col-sm-4 col-form-label\">Average</label> \n" +
+            "              <div class=\"col-sm-8\"> \n" +
+            "<select class='form-control' style='width: 90%;display: inline-block'  id='average' name='average' required><option>--Select Average--</option><option value='15' >15 Minutes</option><option value='30'>30 Minutes</option><option value='60'>1 Hour</option><option value='120'>2 Hours</option><option value='240'>4 Hours</option><option value='360'>6 Hours</option><option value='480'>8 Hours</option><option value='720'>12 Hours</option><option value='1440'>1 Day</option></select>"+
+            "                </div> \n" +
+            "            </div></div>\n" +
+             "             <div class=\"form-group row\"> \n" +
+            "                 <div class=\"col-sm-12\"> \n" +
+            "                    <div style='text-align: center'> <button class='btn btn-success' type='submit'>Submit</button> </div>\n" +
+            "                </div> \n" +
+            "            </div>\n" +
+            "              </div></div>\n" +
+            "              </div></div></div></div></form>";
+
+        var stationdetails = document.getElementById("stationdetails");
+        stationdetails.innerHTML = "<option value=\"\">--SELECT STATION--</option>";
+        for (let i = 0; i < stations.length; i++) {
+
+            var station_id = stations[i]['station_id'];
+
+            stationdetails.innerHTML += "<option value='"+station_id+"'>"+station_id+"</option>";
+        }
+    }
+
+function myFunctionsitesid(){
+  var station_id = document.getElementById("stationdetails").value;
+
+  var parameters = document.getElementById("parameters_list");
+  var inputParamField = document.getElementById('inputParamField');
+  inputParamField.value = '';
+
+
+  let tx = db.transaction(['userdata'], 'readonly');
+    let store = tx.objectStore('userdata');
+
+    let userdata = [];
+    let req = store.openCursor();
+    req.onsuccess = function(event) {
+        // The result of req.onsuccess is an IDBCursor
+        let cursor = event.target.result;
+        if (cursor != null) {
+          // If the cursor isn't null, we got an IndexedDB item.
+          // Add it to the note array and have the cursor continue!
+            console.log(cursor.value);
+          userdata.push(cursor.value);
+          cursor.continue();
+        } else {
+
+            // displaySingleReadings(userdata);
+            // displaystationcount(userdata);
+            // displayreportdownload(userdata);
+             var userdatadetails = userdata[0][0];
+
+                var analyser_details = userdatadetails['analyser_details'];
+
+                parameters.innerHTML = "";
+                for(n=0;n<analyser_details.length;n++){
+
+
+                    var analyser_station_id = analyser_details[n]['station_id'];
+                    var analyser_parameter = analyser_details[n]['parameters'];
+
+
+                    if(analyser_station_id === station_id){
+
+                         parameters.innerHTML +="<input onclick='insertParamToInput(this)'  type=\"checkbox\" id=\"parameter"+n+"\" name='parameter_checkbox'  value=\""+analyser_parameter+"\"><label for=\"parameter"+n+"\" style='font-size: 17px;font-weight: bold;padding-left: 8px;padding-right: 13px;'>"+analyser_parameter+"</label>";
+                    }
+                }
+
+
+        }
+    }
+    req.onerror = function(event) {
+        alert('error in cursor request ' + event.target.errorCode);
+    }
+
+
+
+
+
+
+
+  // parameters.innerHTML = "<div class=\"form-group row\"> \n" +
+  //           "                <label class=\"col-sm-4 col-form-label\">Select Parameter</label>\n" +
+  //           "                 <div class=\"col-sm-8\">\n" +
+  //           "                    <select class='form-control' name='parameter' > </select>";
+  //    for (var i = 1; i <=x; i++) {
+  //
+  //    parameters.innerHTML +=" <option value='"+station_id+"'>"+station_id+"</option>";
+  //
+  //   }
+  //   parameters.innerHTML = "</div></div>";
+
+
+
+}
+
+function insertParamToInput($this){
+      var inputParamField = document.getElementById('inputParamField');
+      var value = $this.value
+        var form = document.querySelector("form");
+      inputParamField.value = '';
+        Array.from(form.querySelectorAll("input")).forEach(function(inp){
+        if(inp.checked === true) {
+            if(inputParamField.value == '' || inputParamField.value == null || inputParamField.value == undefined){
+                    inputParamField.value = inp.value;
+                }else{
+                    inputParamField.value = inputParamField.value +','+ inp.value;
+                }
+        }
+      });
+
+
+}
+function reportRequest(event){
+    event.preventDefault();
+    data = {
+        cmd: "5",
+        analyser_id:analyser_ids,
+        industry_id:"SITE_1",
+        station_id:"STATION_"+WHRB2,
+        datentime:today
+    }
+    sendRequest(data,8,industry_id);
+    // alert('done');
+}
+
+function reportRequestmain(){
+
+        consol.log("------------------------1-------------");
+
+      var station_id = document.getElementById("stationdetails").value;
+      var industry_id = document.getElementById("industry_id").value;
+      var fromdate1 = document.getElementById("fromdate").value;
+      var todate1 = document.getElementById("todate").value;
+      var average = document.getElementById("average").value;
+      var unit = document.getElementById("unit").value;
+      var fromdate = Math.round(fromdate1 / 1000);
+      var todate = Math.round(todate1 / 1000);
+
+      consol.log(station_id);
+      consol.log(station_id);
+      consol.log(industry_id);
+      consol.log(fromdate1);
+      consol.log(todate1);
+
+        data = {
+            cmd: "79",
+            industry_id:industry_id,
+            station_id:station_id,
+            fromdate:"STATION_"+station_id+"#"+fromdate,
+            todate:"STATION_"+station_id+"#"+todate,
+            average:average,
+            unit:unit
+        }
+    sendRequest(data,79,industry_id);
+    // alert('done');
+
+}
+
+// function displaystationalldata(userdata){
+//
+//         console.log("stationviewdata")
+//
+//         var userdatadetails = userdata[0][0];
+//         // var each_subject = JSON.stringify(userdatadetails);
+//         // var userdatadetailsmain = JSON.parse(each_subject);
+//         // console.log(userdatadetailsmain);
+//
+//         var stationlistall = document.getElementById("stationlistall");
+//
+//
+//              var email = userdatadetails['email'];
+//              var stations = userdatadetails['stations'];
+//              var industry_id = userdatadetails['industry_id'];
+//              var analyser_details = userdatadetails['analyser_details'];
+//
+//
+//              console.log(email);
+//              console.log(stations);
+//              var all_analyser_id = [];
+//              var all_station_id = [];
+//
+//         for (let i = 0; i < stations.length; i++) {
+//
+//             var station_id = stations[i]['station_id'+(i+1)];
+//             var monitoring_id = stations[i]['monitoring_id'+(i+1)];
+//             var stack_name = stations[i]['stack_name'+(i+1)];
+//
+//             all_station_id.push(stack_name)
+//
+//
+//         stationlistall.innerHTML += "<div class=\"col-md-12 col-lg-9 col-xl-12 grid-margin stretch-card\"> <div class=\"card\"> <div class=\"card-body\"> <h3 class='header-style'>"+stack_name+"</h3> <div class='row' id='tabledata"+i+"'></div>   </div> <span>" +
+//                "</span> </div> </div>";
+//
+//             var tabledata = document.getElementById("tabledata"+i);
+//           var analyser_id_main = stations[i]['analysers'+i]['analyser_id'+(i+1)];
+//           console.log(analyser_id_main);
+//           console.log(analyser_id_main.length);
+//
+//          for (let j = 0; j < analyser_id_main.length; j++) {
+//
+//              var analyser_id = analyser_id_main[j];
+//              if (typeof analyser_id !== 'undefined' && analyser_id !== '') {
+//
+//                  tabledata.innerHTML += "<div class=' box-style' style='text-align: center;margin: auto;margin-bottom: 7px'><table class='table-style' id='" + analyser_id + "'></table> <a href='?url=readingdata&analyser_id=" + analyser_id + "&station_id=" + all_station_id[i] + "' class='btn'><i class='fa fa-table' style='display: block;margin: auto'></i> Table View</a> <a href='?url=graph_view&analyser_id=" + analyser_id + "&station_id=" + all_station_id[i] + "' class='btn'><i class='fa fa-area-chart'  style='display: block;margin: auto'></i> Graph View</a> </div>";
+//              }
+//          }
+//
+//
+//
+//
+//         }
+//
+//             for (let i = 0; i < analyser_details.length; i++) {
+//
+//                 var analyser_id = analyser_details[i]['analyser_id'+(i+1)];
+//                 var gas_type = analyser_details[i]['gas_type'+(i+1)];
+//                 var max_range = analyser_details[i]['max_range'+(i+1)];
+//                 var min_range = analyser_details[i]['min_range'+(i+1)];
+//                 var parameters = analyser_details[i]['parameters'+(i+1)];
+//                 var unit = analyser_details[i]['unit'+(i+1)];
+//
+//                 all_analyser_id.push(analyser_id)
+//
+//                 console.log("111111111111");
+//                  var analyser_details_inner = document.getElementById(analyser_id);
+//
+//                 try {
+//                     analyser_details_inner.innerHTML += "<tr> <td style='text-align: right;'><b>Analyser Id:</b></td> <td  style='text-align: left;'>" + analyser_id + "</td> </tr> <tr> <td style='text-align: right;'><b>Parameter:</b></td> <td  style='text-align: left;'>" + parameters + "</td> </tr> <tr> <td style='text-align: right;'><b>Process Value Id:</b></td> <td id='value_reading" + analyser_id + "_" + parameters + "'  style='text-align: left;'></td> </tr> <tr> <td style='text-align: right;'><b>Unit:</b></td> <td style='text-align: left;'>" + unit + "</td> </tr><tr> <td style='text-align: right;'><b>Max range:</b></td> <td style='text-align: left;'>" + max_range + "</td> </tr><tr> <td style='text-align: right;'><b>Min range:</b></td> <td style='text-align: left;'>" + min_range + "</td> </tr><tr> <td style='text-align: right;'><b>Gas Type:</b></td> <td style='text-align: left;'>" + gas_type + "</td> </tr>";
+//                 }catch(e){
+//
+//                 }
+//
+//            }
+//
+//
+//              //
+//             data = {
+//                     cmd: "7",
+//                     analyser_id: all_analyser_id,
+//                     industry_id: industry_id,
+//                     station_id: all_station_id,
+//                     datentime: today,
+//                 }
+//
+//                 sendRequest(data,7,0);
+//
+//
+//
+//     }
+
+
+function displaystationalldata(userdata){
+
+
+        var userdatadetails = userdata[0][0];
+        // var each_subject = JSON.stringify(userdatadetails);
+        // var userdatadetailsmain = JSON.parse(each_subject);
+        // console.log(userdatadetailsmain);
+
+        var stationlistall = document.getElementById("stationlistall");
+
+
+             var email = userdatadetails['email'];
+             var stations = userdatadetails['stations'];
+             var industry_id = userdatadetails['industry_id'];
+             var analyser_details = userdatadetails['analyser_details'];
+
+
+             var all_analyser_id = [];
+             var all_station_id = [];
+
+        for (let i = 0; i < stations.length; i++) {
+
+            var station_id = stations[i]['station_id'];
+            var analyser_id = stations[i]['analysers']['analyser_id'][0];
+            var monitoring_id = stations[i]['monitoring_id'];
+            var stack_name = stations[i]['stack_name'];
+
+            all_station_id.push(stack_name)
+
+
+        stationlistall.innerHTML += "<div class=\"grid-margin stretch-card\" > <div class=\"card\"> <div class=\"card-body\"> <h3 class='header-style'>"+stack_name+"</h3> <div class='row' ><div class=\"container\" style='min-height: 238px;padding: 0px;' > <div class=\"row\" id='tabledata"+i+"' style='margin: auto;width: fit-content;'></div> </div> <div class='row' style='margin-left: 0%;display: inline-block;margin-right: 0%;    padding: 10px;  width: 100%;background: #3498db;color:white;border-radius: 5px;'><center><a href='?url=readingdata&analyser_id=" + analyser_id + "&station_id=" + station_id + "&parameters=' class='btn' style='color: white;'><i class='fa fa-table' style='display: block;margin: auto'></i> Table View</a> <a href='?url=graph_view&analyser_id=" + analyser_id + "&station_id=" + all_station_id[i] + "' class='btn' style='color: white;'><i class='fa fa-area-chart'  style='display: block;margin: auto'></i> Graph View</a> </center></div></div></div>   </div> <span>" +
+               "</span> </div> </div>";
+
+          var tabledata = document.getElementById("tabledata"+i+"");
+          var analyser_id_main = stations[i]['analysers']['analyser_id'];
+          var station_id_id_main = stations[i]['station_id'];
+
+
+         for (let j = 0; j < analyser_id_main.length; j++) {
+
+             var analyser_id = analyser_id_main[j];
+             var station_idm = station_id_id_main[j];
+
+
+
+             if (typeof analyser_id !== 'undefined' && analyser_id !== '') {
+
+                 tabledata.innerHTML += "<span  id='"+analyser_id+"' class='row' style='margin: auto!important;display:contents;'></span>";
+             }
+         }
+
+
+
+
+        }
+
+
+        for (let i = 0; i < analyser_details.length; i++) {
+
+
+
+                var analyser_id = analyser_details[i]['analyser_id'];
+                var station_ids = analyser_details[i]['station_id'];
+                var gas_type = analyser_details[i]['gas_type'];
+                var max_range = analyser_details[i]['max_range'];
+                var min_range = analyser_details[i]['min_range'];
+                var parameters = analyser_details[i]['parameters'];
+                var unit = analyser_details[i]['unit'];
+
+
+
+                all_analyser_id.push(analyser_id)
+
+
+                 var analyser_details_inner = document.getElementById(analyser_id);
+
+                try {
+                    var style_to_attach = "";
+                    if(parameters.length > 8){
+                        style_to_attach = "font-size:14px;";
+                    }
+                    analyser_details_inner.innerHTML += "<div class=\"element-card\"  > <a href='?url=readingdata&analyser_id=" + analyser_id + "&station_id=" + station_ids + "&parameters="+parameters+"' class='btn' style='color:#2e294e;'><div class=\"front-facing\" id='value_reading_color_div" + analyser_id + "_" + parameters + "' style='border-color: red;'> <h1 class=\"abr\" id='value_reading_color_h1" + analyser_id + "_" + parameters + "'  style='color:#db3434;"+style_to_attach+"'>"+parameters+"</h1> <p   style='margin-top: 57px;text-align:center;font-weight: bold;'><span id='value_reading" + analyser_id + "_" + parameters + "' >-NA-</span><span style='display:block;font-size: 11px;'>"+unit+" </span> </p></div></a>  </div> ";
+
+                }catch(e){
+
+                }
+
+           }
+
+
+        var l = 0;
+        for (i =0;i<stations.length;i++){
+
+            l=0;
+            var analyser_details_for_param_array = stations[i]['analysers']['analyser_id'];
+            for (j=0;j<analyser_details_for_param_array.length;j++){
+
+                var analyser_details_for_param = analyser_details_for_param_array[j];
+                if(analyser_details_for_param !=""){
+                    for (k=0;k<analyser_details.length;k++){
+                        // console.log("loopppp-333333333333333"+analyser_details_for_param+"::::"+analyser_details[k]['analyser_id']);
+                        if(analyser_details_for_param == analyser_details[k]['analyser_id']){
+                            l++;
+                            // console.log("loopppp-44444444444"+l);
+                        }
+                    }
+                }
+
+            }
+            if(l>7){
+
+                document.getElementById('datawithstyle').innerHTML ="<style>.stretch-card {\n" +
+                    "    width: 100%!important;\n" +
+                    "    margin: 10px;\n" +
+                    "}</style>"
+            }
+        }
+
+
+
+
+
+
+             //
+            data = {
+                    cmd: "7",
+                    analyser_id: all_analyser_id,
+                    industry_id: industry_id,
+                    station_id: all_station_id,
+                    datentime: today,
+                }
+
+                sendRequest(data,7,0);
+
+
+
+    }
+
+function getOccurrence(array, value) {
+    return array.filter((v) => (v === value)).length;
+}
+
+
+
+
+
+
+function analayerdata(){
+
+
+    var userdatadetails = userdata[0];
+    var each_subject = JSON.stringify(userdatadetails);
+    var userdatadetailsmain = JSON.parse(each_subject);
+
+    var analyserdata = document.getElementById("analyserdata");
+
+    var row = userdatadetailsmain;
+    var analyser_id = row['analyser_id'];
+    var industry_id = row['industry_id'];
+    var station_id = row['station_id'];
+    for (let i = 0; i < analyser_id.length; i++) {
+
+           var station_id_main = row['station_id'][i];
+           var analyser_id_main = row['analyser_id'][i];
+           var parameters = row['parameters'][i];
+           var unit = "mg/Nm3";
+
+           analyserdata.innerHTML += "<table style=\"width: 100%;color: black; box-shadow: 0px 0px 5px #c1c1c1 inset;\"> <tr> <td><b>Analyser Id:</b></td> <td>"+analyser_id_main+"</td> </tr> <tr> <td><b>Parameter:</b></td> <td>"+parameters+"</td> </tr> <tr> <td><b>Process Value Id:</b></td> <td id='"+analyser_id_main+"'></td> </tr> <tr> <td><b>Unit:</b></td> <td>"+unit+"</td> </tr> </table>";
+
+        }
+}
+
+
+
+
+function displaySingleReadings(userdata){
+
+
+
+        var userdatadetails = userdata[0];
+        var each_subject = JSON.stringify(userdatadetails);
+        var userdatadetailsmain = JSON.parse(each_subject);
+
+        // var user_main_details = document.getElementById("user_main_details");
+
+
+
+        // for (let i = 0; i < userdatadetailsmain.length; i++) {
+            var row = userdatadetailsmain;
+            // console.log("what we got"+userdatadetailsmain.length);
+            // console.log(row);
+            var industry_name = row['industry_name'];
+            var industry_id = row['industry_id'];
+            var industry_cat = row['industry_cat'];
+            var industry_type = row['industry_type'];
+            var industry_mis_id = row['industry_mis_id'];
+            var site_address = row['site_address'];
+            var city = row['city'];
+            var district = row['district'];
+            var state = row['state'];
+            var pincode = row['pincode'];
+            var installed_pc = row['installed_pc'];
+            var contact_name = row['contact_name'];
+            var designation = row['designation'];
+            var mobile = row['mobile'];
+            var email = row['email'];
+            var user_name = row['user_name'];
+            var password = row['password'];
+            var station_id = row['station_id'];
+            var analyser_id = row['analyser_id'];
+            var stack_name = row['stack_name'];
+            var monitoring_id = row['monitoring_id'];
+            var no_of_parameters = row['no_of_parameters'];
+            var parameters = row['parameters'];
+            var glens_id = row['glens_id'];
+
+
+            // document.write(today);
+         // user_main_details.innerHTML += " <tr> <td>"+industry_name+"</td> <td>"+industry_cat+"</td> <td>"+industry_type+"</td> <td>"+industry_mis_id+"</td> <td>$1500</td> <td>$3200</td> <td> <label class="badge badge-info">On hold</label> </td> <td> <button class="btn btn-outline-primary">View</button> </td> </tr>";
+            data = {
+                cmd: "7",
+                analyser_id: analyser_id,
+                industry_id: industry_id,
+                station_id: station_id,
+                datentime: today,
+
+            }
+
+            sendRequest(data,7,0);
+
+
+        // }
+    }
+
+
+function logout() {
+    var cookies = document.cookie.split(";");
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i];
+            var eqPos = cookie.indexOf("=");
+            var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+            document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        }
+        sessionStorage.clear();
+        localStorage.clear();
+        indexedDB.databases().then(dbs => {
+          dbs.forEach(db => indexedDB.deleteDatabase(db.name))
+        });
+        var transaction = db.transaction(["userdata"], "readwrite");
+        var objectStore = transaction.objectStore("userdata");
+        var objectStoreRequest = objectStore.clear();
+        objectStoreRequest.onsuccess = function(event) {
+            // report the success of our request
+
+          };
+
+}
+
+
+        function stationview(){
+
+            let tx = db.transaction(['userdata'], 'readonly');
+            let store = tx.objectStore('userdata');
+
+            let userdata = [];
+            let req = store.openCursor();
+            req.onsuccess = function(event) {
+                // The result of req.onsuccess is an IDBCursor
+                let cursor = event.target.result;
+                if (cursor != null) {
+                  // If the cursor isn't null, we got an IndexedDB item.
+                  // Add it to the note array and have the cursor continue!
+                    console.log(cursor.value);
+                  userdata.push(cursor.value);
+                  cursor.continue();
+                } else {
+
+                    stationviewdata(userdata);
+                }
+            }
+            req.onerror = function(event) {
+                alert('error in cursor request ' + event.target.errorCode);
+            }
+        }
+
+function stationviewdata(userdata){
+
+
+
+        var userdatadetails = userdata[0][0];
+        var each_subject = JSON.stringify(userdatadetails);
+        var userdatadetailsmain = JSON.parse(each_subject);
+
+
+
+        var stationviewdata = document.getElementById("stationviewdata");
+
+
+            try{
+                  var stations = userdatadetails['stations'];
+            }catch(e){
+                  var stations = '';
+            }
+            try{
+                  var analyser_details = userdatadetails['analyser_details'];
+            }catch(e){
+                  var analyser_details = '';
+            }
+            try{
+                  var row = userdatadetailsmain;
+            }catch(e){
+                  var row = '';
+            }
+            try{
+                  var industry_name = row['industry_name'];
+            }catch(e){
+                  var industry_name = '';
+            }
+            try{
+                  var industry_id = row['industry_id'];
+            }catch(e){
+                  var industry_id = '';
+            }
+            try{
+                  var industry_cat = row['industry_cat'];
+            }catch(e){
+                  var industry_cat = '';
+            }
+            try{
+                  var industry_type = row['industry_type'];
+            }catch(e){
+                  var industry_type = '';
+            }
+            try{
+                  var industry_mis_id = row['industry_mis_id'];
+            }catch(e){
+                  var industry_mis_id = '';
+            }
+            try{
+                  var site_address = row['site_address'];
+            }catch(e){
+                  var site_address = '';
+            }
+            try{
+                  var city = row['city'];
+            }catch(e){
+                  var city = '';
+            }
+            try{
+                  var district = row['district'];
+            }catch(e){
+                  var district = '';
+            }
+            try{
+                  var state = row['state'];
+            }catch(e){
+                  var state = '';
+            }
+            try{
+                  var pincode = row['pincode'];
+            }catch(e){
+                  var pincode = '';
+            }
+            try{
+                  var installed_pc = row['installed_pc'];
+            }catch(e){
+                  var installed_pc = '';
+            }
+            try{
+                  var contact_name = row['contact_name'];
+            }catch(e){
+                  var contact_name = '';
+            }
+            try{
+                  var designation = row['designation'];
+            }catch(e){
+                  var designation = '';
+            }
+            try{
+                  var mobile = row['mobile'];
+            }catch(e){
+                  var mobile = '';
+            }
+            try{
+                  var email = row['email'];
+            }catch(e){
+                  var email = '';
+            }
+            try{
+                  var other_mobile = row['other_mobile'];
+            }catch(e){
+                  var other_mobile = '';
+            }
+            try{
+                  var other_mobile = '';
+            }catch(e){
+                  var other_mobile = '';
+            }
+            try{
+                  var password = row['password'];
+            }catch(e){
+                  var password = '';
+            }
+            try{
+                  var station_id = row['station_id'];
+            }catch(e){
+                  var station_id = '';
+            }
+            try{
+                  var analyser_id = row['analyser_id'];
+            }catch(e){
+                  var analyser_id = '';
+            }
+            try{
+                  var stack_name = row['stack_name'];
+            }catch(e){
+                  var stack_name = '';
+            }
+            try{
+                  var monitoring_id = row['monitoring_id'];
+            }catch(e){
+                  var monitoring_id = '';
+            }
+            try{
+                  var no_of_parameters = row['no_of_parameters'];
+            }catch(e){
+                  var no_of_parameters = '';
+            }
+            try{
+                  var parameters = row['parameters'];
+            }catch(e){
+                  var parameters = '';
+            }
+            try{
+                  var glens_id = row['glens_id'];
+            }catch(e){
+                  var glens_id = '';
+            }
+
+
+
+
+            // document.write(today);
+         stationviewdata.innerHTML += "  <div class=\"row\"> \n" +
+             "\n" +
+             " <div class=\"col-md-12 grid-margin stretch-card\"> <div class=\"card \"> <div class=\"row\"> <div class=\"col-md-6\"> <div class=\"card-body\"> <h4 class=\"card-title\">Basic Details</h4> <p class=\"card-description\"> </p> <form class=\"forms-sample\">\n" +
+             "\n" +
+             " <div class=\"form-group row\"> <label class=\"col-sm-4 col-form-label\">Name of the Industry</label> <div class=\"col-sm-8\"> <input type=\"text\" class=\"form-control\" value=\""+industry_name+"\" disabled style=\"box-shadow: none;\"> </div> </div>\n" +
+             "\n" +
+             " <div class=\"form-group row\"> <label class=\"col-sm-4 col-form-label\">Industry Category</label> <div class=\"col-sm-8\"> <input type=\"text\" class=\"form-control\" value=\""+industry_cat+"\" style=\"box-shadow: none;\" disabled> </div> </div>\n" +
+             "\n" +
+             " <div class=\"form-group row\"> <label class=\"col-sm-4 col-form-label\">Industry Type</label> <div class=\"col-sm-8\"> <input type=\"text\" class=\"form-control\" value=\""+industry_type+"\" style=\"box-shadow: none;\" disabled> </div> </div>\n" +
+             "\n" +
+             " <div class=\"form-group row\"> <label class=\"col-sm-4 col-form-label\">MIS ID ( Industry Consent ID)</label> <div class=\"col-sm-8\"> <input type=\"text\" class=\"form-control\" value=\""+industry_mis_id+"\" style=\"box-shadow: none;\" disabled> </div> </div> <div class=\"form-group row\"> <label class=\"col-sm-4 col-form-label\">City</label> <div class=\"col-sm-8\"> <input type=\"text\" class=\"form-control\" value=\""+city+"\" style=\"box-shadow: none;\" disabled> </div> </div> </form> </div> </div> <div class=\"col-m-6\"> <div class=\"card-body\"> <p class=\"card-description\"> </p> <form class=\"forms-sample\"> <div class=\"form-group row\"> <label class=\"col-sm-4 col-form-label\">District</label> <div class=\"col-sm-8\"> <input type=\"text\" class=\"form-control\" value=\""+district+"\" style=\"box-shadow: none;\" disabled> </div> </div>\n" +
+             "\n" +
+             " <div class=\"form-group row\"> <label class=\"col-sm-4 col-form-label\">State</label> <div class=\"col-sm-8\"> <input type=\"text\" class=\"form-control\" value=\""+state+"\" style=\"box-shadow: none;\" disabled> </div> </div>\n" +
+             "\n" +
+             " <div class=\"form-group row\"> <label class=\"col-sm-4 col-form-label\">Name of Analyzer Software Installed on PC?</label> <div class=\"col-sm-8\"> <input type=\"text\" class=\"form-control\" value=\""+installed_pc+"\" style=\"box-shadow: none;\" disabled> </div> </div>\n" +
+             "\n" +
+             " <div class=\"form-group row\"> <label class=\"col-sm-4 col-form-label\">Pin Code</label> <div class=\"col-sm-8\"> <input type=\"text\" class=\"form-control\" value=\""+pincode+"\" style=\"box-shadow: none;\" disabled> </div> </div>\n" +
+             "\n" +
+             " <div class=\"form-group row\"> <label class=\"col-sm-4 col-form-label\">Site Address</label> <div class=\"col-sm-8\"> <textarea class=\"form-control\" style=\"box-shadow: none;\" disabled>"+site_address+"</textarea> </div> </div> </form> </div> </div> </div></div> </div> \n" +
+             "\n" +
+             " <div class=\"col-md-12 grid-margin stretch-card\"> <div class=\"card\"> <div class=\"card-body\"> <h4 class=\"card-title\">Contact Details</h4> <p class=\"card-description\"> </p> <form class=\"forms-sample\"> <div class=\"form-group row\"> <label for=\"exampleInputUsername2\" class=\"col-sm-3 col-form-label\">Contact Details</label> <div class=\"col-sm-9\"> <input type=\"text\" class=\"form-control\" value=\""+contact_name+"\" style=\"box-shadow: none;\" disabled> </div> </div> <div class=\"form-group row\"> <label for=\"exampleInputEmail2\" class=\"col-sm-3 col-form-label\">Designation</label> <div class=\"col-sm-9\"> <input type=\"email\" class=\"form-control\" value=\""+designation+"\" style=\"box-shadow: none;\" disabled> </div> </div> <div class=\"form-group row\"> <label for=\"exampleInputMobile\" class=\"col-sm-3 col-form-label\">Mobile.No</label> <div class=\"col-sm-9\"> <input type=\"text\" class=\"form-control\" value=\""+mobile+"\" style=\"box-shadow: none;\" disabled> </div> </div> <div class=\"form-group row\"> <label for=\"exampleInputConfirmPassword2\" class=\"col-sm-3 col-form-label\">Other Details</label> <div class=\"col-sm-9\"> <input type=\"text\" class=\"form-control\" value=\""+other_mobile+"\" style=\"box-shadow: none;\" disabled> </div> </div> <div class=\"form-group row\"> <label for=\"exampleInputPassword2\" class=\"col-sm-3 col-form-label\">Email</label> <div class=\"col-sm-9\"> <input type=\"email\" class=\"form-control\" value=\""+email+"\" style=\"box-shadow: none;\" disabled> </div> </div> <div class=\"form-group row\"> <label for=\"exampleInputConfirmPassword2\" class=\"col-sm-3 col-form-label\">Password</label> <div class=\"col-sm-9\"> <input type=\"text\" class=\"form-control\" value=\""+password+"\" style=\"box-shadow: none;\" disabled> </div> </div> </form> </div> </div> </div>\n" +
+             "\n" +
+             " <div class='row' id='sitedetailslist'></div></div>";
+
+             for (let i = 0; i <stations.length; i++) {
+                var analyser_id_inner = stations[i]['analysers']['analyser_id'];
+                // var analyser_id_inner =stations[i]['analysers'+i];
+                var station_id_inner =stations[i]['station_id'];
+                var monitoring_id_inner = stations[i]['monitoring_id'];
+                var stack_name_inner = stations[i]['stack_name'];
+
+
+             document.getElementById("sitedetailslist").innerHTML += "<div class=\"col-md-12 grid-margin stretch-card\"> <div class=\"card\"> <div class=\"card-body\"> <h4 class=\"card-title\">Site Details-"+(i+1)+"</h4> <p class=\"card-description\"> </p> <form class=\"forms-sample\"> <div class=\"form-group row\"> <label for=\"exampleInputUsername2\" class=\"col-sm-3 col-form-label\">Station Id</label> <div class=\"col-sm-9\"> <input type=\"text\" class=\"form-control\" value=\""+station_id_inner+"\" style=\"box-shadow: none;\" disabled> </div> </div> <div class=\"form-group row\"> <label for=\"exampleInputEmail2\" class=\"col-sm-12 col-form-label\">Analyser Id</label> <div class=\"col-sm-12\" id='tabledatasite"+i+"'> </div> </div> <div class=\"form-group row\"> <label for=\"exampleInputMobile\" class=\"col-sm-3 col-form-label\">Stack Name</label> <div class=\"col-sm-9\"> <input type=\"text\" class=\"form-control\" value=\""+stack_name_inner+"\" style=\"box-shadow: none;\" disabled> </div> </div> <div class=\"form-group row\"> <label for=\"exampleInputPassword2\" class=\"col-sm-3 col-form-label\">Monitoring Id</label> <div class=\"col-sm-9\"> <input type=\"email\" class=\"form-control\" value=\""+monitoring_id_inner+"\" style=\"box-shadow: none;\" disabled> </div> </div>  </form> </div> </div> </div>";
+                        var tabledatasite = document.getElementById("tabledatasite"+i);
+
+        for (let j = 0; j < analyser_id_inner.length; j++) {
+
+            var analyser_id = analyser_id_inner[j];
+            if (typeof analyser_id !== 'undefined' && analyser_id !== '') {
+
+
+
+
+                        tabledatasite.innerHTML += "<div class=' box-style' style='text-align: center' ><table class='table-style' id='innermain_"+analyser_id+"'></table></div>";
+            }
+        }
+
+
+
+
+        }
+
+            for (let i = 0; i < analyser_details.length; i++) {
+
+                var analyser_id = analyser_details[i]['analyser_id'];
+                var gas_type = analyser_details[i]['gas_type'];
+                var max_range = analyser_details[i]['max_range'];
+                var min_range = analyser_details[i]['min_range'];
+                var parameters = analyser_details[i]['parameters'];
+                var unit = analyser_details[i]['unit'];
+
+                 document.getElementById("innermain_"+analyser_id).innerHTML += "<tr> <td style='text-align: right;'><b>Analyser Id:</b></td> <td  style='text-align: left;'>"+analyser_id+"</td> </tr> <tr> <td style='text-align: right;'><b>Parameter:</b></td> <td  style='text-align: left;'>"+parameters+"</td> </tr>  <tr> <td style='text-align: right;'><b>Unit:</b></td> <td style='text-align: left;'>"+unit+"</td> </tr><tr> <td style='text-align: right;'><b>Max range:</b></td> <td style='text-align: left;'>"+max_range+"</td> </tr><tr> <td style='text-align: right;'><b>Min range:</b></td> <td style='text-align: left;'>"+min_range+"</td> </tr><tr> <td style='text-align: right;'><b>Gas Type:</b></td> <td style='text-align: left;'>"+gas_type+"</td> </tr> <tr><td style='display: none'>  <a href='?url=readingdata&analyser_id=" + analyser_id + "' class='btn' ><i class='fa fa-table' style='display: block;margin: auto'></i> Table View</a> </td><td style='display: none'><a href='?url=graph_view&analyser_id=" + analyser_id + "' class='btn'><i class='fa fa-area-chart'  style='display: block;margin: auto'></i> Graph View</a> </td></tr>";
+            }
+
+
+    }
+
+
+
+
+
+
+    </script>

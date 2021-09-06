@@ -1,0 +1,200 @@
+
+       <!--  <footer class="footer">
+          <div class="w-100 clearfix" style="padding: 60px;">
+            <span class="text-muted d-block text-center text-sm-left d-sm-inline-block">Copyright © 2020 <a href="#" target="_blank">Vasthi Enviro</a>. All rights reserved.</span>
+            <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center">Hand-crafted & made with vasthi <i class="mdi mdi-heart-outline text-danger"></i></span>
+          </div>
+        </footer> -->
+        <!-- partial -->
+      </div>
+      <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+  <!-- container-scroller -->
+<script>
+function openNav() {
+  document.getElementById("mySidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("menubtn").style.display = "none";
+  document.getElementById("clsbtn").style.display = "block";
+
+}
+
+function closeNav() {
+    document.getElementById("menubtn").style.display = "block";
+  document.getElementById("clsbtn").style.display = "none";
+  document.getElementById("mySidenav").style.width = "60px";
+  // document.getElementsByClassName("demo")[0].style.color = "red";
+  document.getElementById("main").style.marginLeft= "0";
+}
+</script>
+  <!-- plugins:js -->
+       <script src="https://vasthienviro.s3.ap-south-1.amazonaws.com/vendors/js/off-canvas.js"></script>
+  <script src="https://vasthienviro.s3.ap-south-1.amazonaws.com/vendors/js/vendor.bundle.base.js"></script>
+  <script src="https://vasthienviro.s3.ap-south-1.amazonaws.com/vendors/js/vendor.bundle.addons.js"></script>
+  <!-- endinject -->
+  <!-- Plugin js for this page-->
+  <!-- End plugin js for this page-->
+  <!-- inject:js -->
+  <script src="https://vasthienviro.s3.ap-south-1.amazonaws.com/js/off-canvas.js"></script>
+  <script src="https://vasthienviro.s3.ap-south-1.amazonaws.com/js/hoverable-collapse.js"></script>
+  <script src="https://vasthienviro.s3.ap-south-1.amazonaws.com/js/template.js"></script>
+  <script src="https://vasthienviro.s3.ap-south-1.amazonaws.com/js/settings.js"></script>
+  <script src="https://vasthienviro.s3.ap-south-1.amazonaws.com/js/todolist.js"></script>
+  <!-- endinject -->
+  <!-- Custom js for this page-->
+  <script src="https://vasthienviro.s3.ap-south-1.amazonaws.com/js/dashboard.js"></script>
+
+  <script src="https://vasthienviro.s3.ap-south-1.amazonaws.com/js/wizard.js"></script>
+
+
+<script src="https://vasthienviro.s3.ap-south-1.amazonaws.com/js/data-table.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js" integrity="sha512-UXumZrZNiOwnTcZSHLOfcTs0aos2MzBWHXOHOuB0J/R44QB0dwY5JgfbvljXcklVf65Gc4El6RjZ+lnwd2az2g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/1.1.1/chartjs-plugin-zoom.min.js" integrity="sha512-NxlWEbNbTV6acWnTsWRLIiwzOw0IwHQOYUCKBiu/NqZ+5jSy7gjMbpYI+/4KvaNuZ1qolbw+Vnd76pbIUYEG8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<span id="grapdatascript">
+
+</span>
+<!--<script>-->
+
+<!--var ctx = document.getElementById('myChart').getContext('2d');-->
+<!--var myChart = new Chart(ctx, {-->
+<!--    type: 'line',-->
+<!--    data: {-->
+<!--        labels: ['01:00', '01:15', '01:30', '01:45','02:00', '02:15', '02:30', '02:45','03:00', '03:15', '03:30', '03:45','03:00', '03:15', '03:30', '03:45',],-->
+<!--        datasets: [{-->
+<!--            label: 'Station-1',-->
+<!--            data: [12, 19, 3, 5, 2, 3,12, 19,12, 19, 3, 5, 2, 3,12, 19,12, 19, 3, 5, 2, 3,12, 19,12, 19, 3, 5, 2, 3,12, 19,],-->
+<!--            backgroundColor: [-->
+<!--                'rgba(255, 99, 132, 0.2)',-->
+<!--                'rgba(54, 162, 235, 0.2)',-->
+<!--                'rgba(255, 206, 86, 0.2)',-->
+<!--                'rgba(75, 192, 192, 0.2)',-->
+<!--                'rgba(153, 102, 255, 0.2)',-->
+<!--                'rgba(255, 159, 64, 0.2)'-->
+<!--            ],-->
+<!--            borderColor: [-->
+<!--                'rgba(255, 99, 132, 1)',-->
+<!--                'rgba(54, 162, 235, 1)',-->
+<!--                'rgba(255, 206, 86, 1)',-->
+<!--                'rgba(75, 192, 192, 1)',-->
+<!--                'rgba(153, 102, 255, 1)',-->
+<!--                'rgba(255, 159, 64, 1)'-->
+<!--            ],-->
+<!--            borderWidth: 1-->
+<!--        }]-->
+<!--    },-->
+<!--    options: {-->
+<!--              scales:{-->
+<!--                      y:{-->
+<!--                        beginAtZero:true-->
+<!--                        }-->
+<!--                },-->
+<!--                plugins:{-->
+<!--                    zoom:{-->
+<!--                      pan:{-->
+<!--                        enabled:true,-->
+<!--                        mode:'x'-->
+
+<!--                      },-->
+<!--                      zoom:{-->
+<!--                        mode:'x',-->
+<!--                        wheel:{-->
+<!--                          enabled:true-->
+<!--                        },-->
+<!--                      drag:{-->
+<!--                        enabled:true,-->
+<!--                        modifierKey:'ctrl',-->
+<!--                        backgroundColor:'rgba(255, 99, 132, 0.2)',-->
+<!--                        borderColor:'rgba(255, 99, 132, 1)',-->
+<!--                        borderWidth:1-->
+
+<!--                      },-->
+<!--                      pinch:{-->
+<!--                        enabled: true,-->
+<!--                         modifierKey:'ctrl'-->
+
+<!--                      },-->
+<!--                    }-->
+<!--                  }-->
+
+<!--               }-->
+<!--            }-->
+<!--});-->
+
+<!--function resetZoomChart() {-->
+<!--  // body...-->
+<!--  myChart.resetZoom();-->
+<!--}-->
+
+<!--</script>-->
+
+<script>
+function resetZoomChart() {
+      myChart.resetZoom();
+}
+function graph_inline(labels_array,data_array){
+    var areaData = {
+    labels: labels_array,
+    datasets: data_array
+};
+
+console.log("data_array"+JSON.stringify(areaData))
+
+var ctx = document.getElementById('myChart').getContext('2d');
+
+myChart = new Chart(ctx, {
+    type: 'line',
+    data: areaData,
+    options: {
+              scales:{
+                      y:{
+                        beginAtZero:true
+                        }
+                },
+                plugins:{
+                    zoom:{
+                      pan:{
+                        enabled:true,
+                        mode:'x'
+
+                      },
+                      zoom:{
+                        mode:'x',
+                        wheel:{
+                          enabled:true
+                        },
+                      drag:{
+                        enabled:true,
+                        modifierKey:'ctrl',
+                        backgroundColor:'rgba(255, 99, 132, 0.2)',
+                        borderColor:'rgba(255, 99, 132, 1)',
+                        borderWidth:1
+
+                      },
+                      pinch:{
+                        enabled: true,
+                         modifierKey:'ctrl'
+
+                      },
+                    }
+                  }
+
+               }
+            }
+
+
+});
+}
+
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,119 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Vasthi Env</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://vasthienviro.s3.ap-south-1.amazonaws.com/vendors/iconfonts/mdi/font/css/materialdesignicons.min.css">
+  <link rel="stylesheet" href="https://vasthienviro.s3.ap-south-1.amazonaws.com/vendors/css/vendor.bundle.base.css">
+  <link rel="stylesheet" href="https://vasthienviro.s3.ap-south-1.amazonaws.com/vendors/css/vendor.bundle.addons.css">
+  <link rel="stylesheet" href="https://vasthienviro.s3.ap-south-1.amazonaws.com/css/horizontal-layout/style.css">
+  <link rel="shortcut icon" href="https://vasthienviro.s3.ap-south-1.amazonaws.com/images/favicon.png" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+</head>
+<body>
+  <div class="container-scroller">
+    <div class="container-fluid page-body-wrapper full-page-wrapper">
+      <div class="content-wrapper d-flex align-items-stretch auth auth-img-bg">
+        <div class="row flex-grow">
+          <div class="col-lg-6 d-flex align-items-center justify-content-center">
+            <div class="auth-form-transparent text-left p-3">
+              <div class="brand-logo">
+                <img src="https://vasthienviro.s3.ap-south-1.amazonaws.com/images/logov.png" alt="logo">
+              </div>
+              <h4>Welcome back!</h4>
+              <h6 class="font-weight-light">Happy to see you again!</h6>
+                <h6 id="error_msg" class="font-weight-light" style="color: red;"></h6>
+<!--              <form class="pt-3"  onsubmit="return results();">-->
+                 <div style="background-color: red;border-radius: 20px;">
+     <!-- error messagae -->
+                      </div>
+                <div class="form-group">
+                  <label for="exampleInputEmail">Username</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend bg-transparent">
+                      <span class="input-group-text bg-transparent border-right-0">
+                        <i class="mdi mdi-account-outline text-primary"></i>
+                      </span>
+                    </div>
+                    <input type="text" class="form-control form-control-lg border-left-0" id="username" placeholder="Username"  required name="username">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="exampleInputPassword">Password</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend bg-transparent">
+                      <span class="input-group-text bg-transparent border-right-0">
+                        <i class="mdi mdi-lock-outline text-primary"></i>
+                      </span>
+                    </div>
+                    <input type="password" class="form-control form-control-lg border-left-0" id="password" required placeholder="Password"  name="password">
+                  </div>
+                </div>
+                <div class="my-2 d-flex justify-content-between align-items-center">
+                  <div class="form-check">
+                    <label class="form-check-label text-muted">
+                      <input type="checkbox" class="form-check-input">
+                      Keep me signed in
+                    </label>
+                  </div>
+                  <a href="#" class="auth-link text-black">Forgot password?</a>
+                </div>
+                <div class="my-3">
+
+
+                  <button class="btn btn-block btn-primary btn-lg font-weight-medium auth-form-btn" name="submit" id="submit" onclick="results()" > LOGIN</button>
+
+                </div>
+
+<!--              </form>-->
+            </div>
+          </div>
+          <div class="col-lg-6 login-half-bg d-flex flex-row">
+            <p class="text-white font-weight-medium text-center flex-grow align-self-end">Copyright &copy; 2021  All rights reserved.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+
+
+ <script type="text/javascript">
+   function results() {
+    var username =document.getElementById('username').value;
+    var password =document.getElementById('password').value;
+
+    // alert(username);
+
+      data = {
+            cmd: "6",
+            email:username,
+            password:password,
+
+        }
+
+      sendRequest(data,6,0);
+
+   }
+ </script>
+  <script src="https://vasthienviro.s3.ap-south-1.amazonaws.com/vendors/js/vendor.bundle.base.js"></script>
+  <script src="https://vasthienviro.s3.ap-south-1.amazonaws.com/vendors/js/vendor.bundle.addons.js"></script>
+  <script src="https://vasthienviro.s3.ap-south-1.amazonaws.com/js/off-canvas.js"></script>
+  <script src="https://vasthienviro.s3.ap-south-1.amazonaws.com/js/hoverable-collapse.js"></script>
+  <script src="https://vasthienviro.s3.ap-south-1.amazonaws.com/js/template.js"></script>
+  <script src="https://vasthienviro.s3.ap-south-1.amazonaws.com/js/settings.js"></script>
+  <script src="https://vasthienviro.s3.ap-south-1.amazonaws.com/js/todolist.js"></script>
+
+</body>
+
+
+</html>

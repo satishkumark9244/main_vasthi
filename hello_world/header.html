@@ -1,0 +1,470 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Vasthi Enviro</title>
+  <!-- plugins:css -->
+  <link rel="stylesheet" href="https://vasthienviro.s3.ap-south-1.amazonaws.com/vendors/iconfonts/mdi/font/css/materialdesignicons.min.css">
+  <link rel="stylesheet" href="https://vasthienviro.s3.ap-south-1.amazonaws.com/vendors/css/vendor.bundle.base.css">
+  <link rel="stylesheet" href="https://vasthienviro.s3.ap-south-1.amazonaws.com/vendors/css/vendor.bundle.addons.css">
+  <link rel="stylesheet" href="https://vasthienviro.s3.ap-south-1.amazonaws.com/css/horizontal-layout/style.css">
+  <!-- endinject -->
+<!--  <link rel="shortcut icon" href="images/" />-->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+
+
+</head>
+
+<body >
+  <style type="text/css">
+@import url(//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css);
+@import url(https://fonts.googleapis.com/css?family=Titillium+Web:300);
+.fa-2x {
+font-size: 2em;
+}
+.fa {
+position: relative;
+display: table-cell;
+width: 60px;
+height: 36px;
+text-align: center;
+vertical-align: middle;
+font-size:20px;
+}
+#main{
+  transition: 0.5s;
+}
+
+.main-menu:hover,nav.main-menu.expanded {
+width:250px!important;
+overflow:visible;
+transition: 0.5s;
+}
+
+.main-menu {
+background:#4857a3;
+border-right:1px solid #e5e5e5;
+position:absolute;
+top:0;
+bottom:0;
+height:100%;
+left:0;
+width:60px;
+position: fixed;
+overflow:hidden;
+transition: 0.5s;
+/*-webkit-transition:width .05s linear;*/
+/*transition:width .05s linear;*/
+-webkit-transform:translateZ(0) scale(1,1);
+z-index:1000;
+}
+
+.main-menu>ul {
+margin:7px 0;
+margin-top: 100px;
+}
+
+.main-menu li {
+position:relative;
+display:block;
+width:250px;
+transition: 0.5s;
+/*margin: 20px;*/
+margin-left: 16px;
+    margin-top: 28px;
+}
+
+.main-menu li>a {
+position:relative;
+display:table;
+border-collapse:collapse;
+border-spacing:0;
+transition: 0.5s;
+color:#fff;
+ font-family: arial;
+font-size: 14px;
+text-decoration:none;
+-webkit-transform:translateZ(0) scale(1,1);
+/*-webkit-transition:all .1s linear;*/
+/*transition:all .1s linear;*/
+
+}
+
+.main-menu .nav-icon {
+position:relative;
+display:table-cell;
+width:60px;
+height:36px;
+text-align:center;
+vertical-align:middle;
+font-size:18px;
+}
+
+.main-menu .nav-text {
+position:relative;
+display:table-cell;
+    padding-left: 14px;
+vertical-align:middle;
+width:190px;
+  font-family: 'Titillium Web', sans-serif;
+}
+
+.main-menu>ul.logout {
+position:absolute;
+left:0;
+bottom:0;
+}
+
+.no-touch .scrollable.hover {
+overflow-y:hidden;
+}
+
+.no-touch .scrollable.hover:hover {
+overflow-y:auto;
+overflow:visible;
+}
+
+a:hover,a:focus {
+text-decoration:none;
+}
+
+nav {
+-webkit-user-select:none;
+-moz-user-select:none;
+-ms-user-select:none;
+-o-user-select:none;
+user-select:none;
+}
+
+nav ul,nav li {
+outline:0;
+margin:0;
+padding:0;
+}
+.main-menu li:hover>a,nav.main-menu li.active>a,.dropdown-menu>li>a:hover,.dropdown-menu>li>a:focus,.dropdown-menu>.active>a,.dropdown-menu>.active>a:hover,.dropdown-menu>.active>a:focus,.no-touch .dashboard-page nav.dashboard-menu ul li:hover a,.dashboard-page nav.dashboard-menu ul li.active a {
+color:#fff;
+/*background-color:#5fa2db;*/
+transition:0.6s;
+}
+.area {
+float: left;
+background: #e2e2e2;
+width: 100%;
+height: 100%;
+}
+@font-face {
+  font-family: 'Titillium Web';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Titillium WebLight'), local('TitilliumWeb-Light'), url(https://themes.googleusercontent.com/static/fonts/titilliumweb/v2/anMUvcNT0H1YN4FII8wpr24bNCNEoFTpS2BTjF6FB5E.woff) format('woff');
+}
+
+  </style>
+    <style>
+/** {
+  box-sizing: border-box;
+}
+
+#myInput {
+  background-image: url('/css/searchicon.png');
+  background-position: 10px 12px;
+  background-repeat: no-repeat;
+  width: 100%;
+  font-size: 16px;
+  padding: 12px 20px 12px 40px;
+  border: 1px solid #ddd;
+  margin-bottom: 12px;
+}*/
+.searchdiv {
+        background-color: #fefefe;
+    margin: auto;
+    padding: 21px;
+    background: #fff;
+    box-shadow: 0 4px 6px rgb(32 33 36 / 28%);
+    width: 27%;
+    border-radius: 6px;
+
+}
+#search-box{
+   display: none; /* Hidden by default */
+  position: fixed;
+    z-index: 1;
+    padding-top: 49px;
+    padding-left: 11%;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+}
+#myUL {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+#myUL li a {
+    margin-top: -1px;
+    padding: 12px;
+    text-decoration: none;
+    font-size: 15px;
+    color: black;
+    display: inline-block;
+}
+
+#myUL li:hover:not(.header) {
+      background-color: #eee;
+    border-radius: 5px;
+}
+</style>
+ <div class="area"></div>
+
+ <nav class="main-menu" id="mySidenav">
+  <span style="cursor: pointer;
+    color: white;
+    padding: 9px;
+    padding-top: 14px;
+    display: block;" id="menubtn" onclick="openNav()">
+<img src="https://vasthienviro.s3.ap-south-1.amazonaws.com/images/sa/menu.png" style="height: 40px;">
+</span>
+  <a href="javascript:void(0)" class="closebtn" id="clsbtn" style="cursor: pointer;
+    color: white;
+    padding: 9px;
+    padding-top: 14px;display: none;" onclick="closeNav()" >
+    <img src="https://vasthienviro.s3.ap-south-1.amazonaws.com/images/sa/cls.png" style="height: 40px;">
+
+  </a>
+            <ul>
+                <li>
+                    <a href="?url=dashboard">
+<img src="https://vasthienviro.s3.ap-south-1.amazonaws.com/images/sa/new/home.png" style="height: 29px;">
+                        <span class="nav-text">
+                            Home
+                        </span>
+                    </a>
+
+                </li>
+                <li>
+                    <a href="?url=stationview">
+<img src="https://vasthienviro.s3.ap-south-1.amazonaws.com/images/sa/new/sitedetails.png" style="height: 29px;">
+                        <span class="nav-text">
+                            Site Details
+                        </span>
+                    </a>
+
+                </li>
+                <li class="has-subnav">
+                    <a href="?url=stationviewalldata">
+<img src="https://vasthienviro.s3.ap-south-1.amazonaws.com/images/sa/new/livestatus.png" style="height: 29px;">
+
+                        <span class="nav-text">
+                           Live Status
+                        </span>
+                    </a>
+
+                </li>
+                <li class="has-subnav">
+                    <a href="?url=report_view">
+<img src="https://vasthienviro.s3.ap-south-1.amazonaws.com/images/sa/new/reports.png" style="height: 29px;width: 32px;">
+
+                        <span class="nav-text">
+                            Regular Reports
+                        </span>
+                    </a>
+
+                </li>
+                <li >
+                    <a href="?url=license_renew">
+                       <img src="https://vasthienviro.s3.ap-south-1.amazonaws.com/images/sa/new/license.png" style="height: 29px;">
+                        <span class="nav-text">
+                            License
+                        </span>
+                    </a>
+
+                </li>
+                <li id="calibrationnav">
+                    <a href="?url=remote_calibration"  id="calibrationnav1">
+   <img src="https://vasthienviro.s3.ap-south-1.amazonaws.com/images/sa/new/calibration.png" style="height: 29px;cursor: no-drop">
+                        <span class="nav-text">
+                            Remote Calibration
+                        </span>
+                    </a>
+                </li>
+                <li id="schedulenav">
+                    <a href="?url=schedule" id="schedulenav1">
+    <img src="https://vasthienviro.s3.ap-south-1.amazonaws.com/images/sa/new/schedule.png" style="height: 29px;cursor: no-drop">
+                        <span class="nav-text">
+                           Schedule
+                        </span>
+                    </a>
+                </li>
+                <li id="cameranav">
+
+                </li>
+
+
+
+            </ul>
+
+            <ul class="logout">
+                <li>
+    <a onclick="logout123();">
+    <img src="https://vasthienviro.s3.ap-south-1.amazonaws.com/images/sa/new/logout.png" style="height: 29px;" >
+                <span class="nav-text">
+                           Logout
+                        </span>
+    </a>
+                </li>
+            </ul>
+        </nav>
+  <div class="container-scroller" id="main">
+
+    <!-- partial:partials/_horizontal-navbar.html -->
+    <div class="horizontal-menu">
+      <nav class="navbar top-navbar col-lg-12 col-12 p-0">
+        <div class="container">
+          <div class="d-flex align-items-center justify-content-between w-100">
+            <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center">
+
+              <a class="navbar-brand brand-logo" href="?url=dashboard"><img src="https://vasthienviro.s3.ap-south-1.amazonaws.com/images/logov.png" alt="logo"/></a>
+              <a class="navbar-brand brand-logo-mini" href="?url=dashboard"><img src="https://vasthienviro.s3.ap-south-1.amazonaws.com/images/logov.png" alt="logo"/></a>
+              <div class="welcome-message d-lg-flex d-none" style="max-width: 250px;"><div  class="sitedetails" id="sitenameheader"></div></div>
+            </div>
+            <div class="navbar-menu-wrapper d-flex align-items-center justify-content-between">
+              <ul class="navbar-nav mr-lg-2">
+                <li class="nav-item nav-search d-none d-lg-block">
+                  <div class="input-group">
+                     <input type="text" id="myInput" onkeyup="myFunctionheadersearch()" autocomplete="off" class="form-control" placeholder="Search " aria-label="search" aria-describedby="search" style="z-index: 99;"><div class="input-group-append">
+                      <span class="input-group-text" id="search">
+                        <i class="mdi mdi-magnify"></i>
+                      </span>
+                    </div>
+                    <style>
+                        .sf {
+
+                            align-items: center;
+                            margin: 0 13px 0 1px;
+                            color: #a6abb1;
+
+                        }
+                    </style>
+                    <div id="search-box">
+                      <div class="searchdiv">
+                        <ul id="myUL">
+                          <li><i class="mdi mdi-magnify sf"></i><a href="https://vasthienviro.com/?url=stationview">Site Details</a></li>
+                          <li><i class="mdi mdi-magnify sf"></i><a href="https://vasthienviro.com/?url=stationviewalldata">Live Status</a></li>
+
+                          <li><i class="mdi mdi-magnify sf"></i><a href="https://vasthienviro.com/?url=report_view">Regular Reports</a></li>
+                          <li><i class="mdi mdi-magnify sf"></i><a href="https://vasthienviro.com/?url=license_renew">License</a></li>
+
+                          <li><i class="mdi mdi-magnify sf"></i><a href="https://vasthienviro.com/?url=industry_report">Industry Reports</a></li>
+                          <li><i class="mdi mdi-magnify sf"></i><a href="https://vasthienviro.com/?url=remote_calibration">Remote Calibration</a></li>
+                          <li><i class="mdi mdi-magnify sf"></i><a href="http://stream.vasthienviro.com/env/stream/stream.php?site_id=SITE_8_1">Camera</a></li>
+                          <li><i class="mdi mdi-magnify sf"></i><a href="https://vasthienviro.com/?url=schedule">Schedule</a></li>
+                        </ul>
+                      </div>
+
+                </div>
+                  </div>
+                </li>
+              </ul>
+              <ul class="navbar-nav navbar-nav-right">
+                <li class="nav-item dropdown">
+                  <!-- data-toggle="dropdown" -->
+                  <a class="nav-link count-indicator dropdown-toggle" id="notificationDropdown" href="#" >
+                    <i class="mdi mdi-bell mx-0"></i>
+                    <span class="count">0</span>
+                  </a>
+
+                </li>
+                <li class="nav-item dropdown">
+                  <!-- data-toggle="dropdown" -->
+                  <a class="nav-link count-indicator dropdown-toggle" id="mailDropdown" href="#" >
+                    <i class="mdi mdi-email-open mx-0"></i>
+                    <span class="count">0</span>
+                  </a>
+                  <div class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list" aria-labelledby="mailDropdown">
+<!--                    <a class="dropdown-item">-->
+<!--                      <p class="mb-0 font-weight-normal float-left">You have 4 new notifications-->
+<!--                      </p>-->
+<!--                      <span class="badge badge-pill badge-warning float-right">View all</span>-->
+<!--                    </a>-->
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item preview-item">
+                      <div class="preview-thumbnail">
+                        <div class="preview-icon bg-success">
+                          <i class="mdi mdi-information mx-0"></i>
+                        </div>
+                      </div>
+                      <div class="preview-item-content">
+                        <h6 class="preview-subject font-weight-medium">Application Error</h6>
+                        <p class="font-weight-light small-text mb-0">
+                          Just now
+                        </p>
+                      </div>
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item preview-item">
+                      <div class="preview-thumbnail">
+                        <div class="preview-icon bg-warning">
+                          <i class="mdi mdi-settings mx-0"></i>
+                        </div>
+                      </div>
+                      <div class="preview-item-content">
+                        <h6 class="preview-subject font-weight-medium">Settings</h6>
+                        <p class="font-weight-light small-text mb-0">
+                          Private message
+                        </p>
+                      </div>
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item preview-item">
+                      <div class="preview-thumbnail">
+                        <div class="preview-icon bg-info">
+                          <i class="mdi mdi-account-box mx-0"></i>
+                        </div>
+                      </div>
+                      <div class="preview-item-content">
+                        <h6 class="preview-subject font-weight-medium">New user registration</h6>
+                        <p class="font-weight-light small-text mb-0">
+                          2 days ago
+                        </p>
+                      </div>
+                    </a>
+                  </div>
+                </li>
+              </ul>
+              <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-toggle="horizontal-menu-toggle">
+                <span class="mdi mdi-menu"></span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </nav>
+<script>
+function myFunctionheadersearch() {
+  document.getElementById("search-box").style.display = "block";
+    var input, filter, ul, li, a, i, txtValue;
+    input = document.getElementById("myInput");
+    filter = input.value.toUpperCase();
+    ul = document.getElementById("myUL");
+    li = ul.getElementsByTagName("li");
+    for (i = 0; i < li.length; i++) {
+        a = li[i].getElementsByTagName("a")[0];
+        txtValue = a.textContent || a.innerText;
+        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            li[i].style.display = "";
+        } else {
+            li[i].style.display = "none";
+        }
+    }
+}
+</script>
+    </div>

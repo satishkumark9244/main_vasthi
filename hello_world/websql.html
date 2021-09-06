@@ -1,0 +1,425 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" ></script>
+
+<script>
+
+
+// var db = openDatabase('mydb', '1.0', 'Test DB', 2 * 1024 * 1024);
+//
+// db.transaction(function (tx) {
+//    tx.executeSql('CREATE TABLE IF NOT EXISTS LOGS (id unique, log)');
+//    tx.executeSql('INSERT INTO LOGS (id, log) VALUES (1, "foobar")');
+//    tx.executeSql('INSERT INTO LOGS (id, log) VALUES (2, "logmsg")');
+// });
+
+
+ var websqldb = openDatabase("itemDB","1.0","itemDB",65535);
+
+
+
+function insertReportdata($result){
+
+
+
+        var query = "DROP TABLE reports";
+          websqldb.transaction(function (tx) {
+            tx.executeSql(query);
+        });
+
+        var result = $result;
+        websqldb.transaction(function(transaction){
+
+
+            var sql = "CREATE TABLE IF NOT EXISTS reports (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,station_id VARCHAR(200) NOT NULL,analyser_id VARCHAR(200) NOT NULL,parameters VARCHAR(200) NOT NULL,reading VARCHAR(200) NOT NULL,unit VARCHAR(200) NOT NULL,datentime VARCHAR(200) NOT NULL)";
+            transaction.executeSql(sql,undefined,function(){
+                websqldb.transaction(function (transaction) {
+               var data = result
+
+                    var data_length = data.length
+                    var j = 0;
+                    for (i=0;i<data_length;i++) {
+                        var station_id = data[i].station_id;//decode json
+                        var station_idm = station_id.slice(0, -11);
+                        var analyser_id = data[i].analyser_id;//decode json
+                        var parameters = data[i].parameter_id;//decode json
+                        var reading = data[i].reading;//decode json
+
+                        var unit = data[i].unit;//decode json
+                        var datentime = data[i].datentime;//decode json
+
+                        for (k=0;k<reading.length;k++) {
+
+                            for (l = 0; l < reading[k].length; l++) {
+
+                                var reading1 = reading[k][l];
+
+
+                                var parameters1 = parameters[k][l];
+
+                                try {
+                                    var unit1 = unit[k][l];
+                                }catch(e){
+                                    var unit1 = "mg/Nm3";
+                                }
+
+
+
+                                var sql = "INSERT INTO reports(station_id,analyser_id,parameters,reading,unit,datentime) VALUES(?,?,?,?,?,?)";
+                                transaction.executeSql(sql, [station_idm, analyser_id, parameters1, reading1, unit1, datentime], function () {
+                                    j++;
+
+
+
+                                }, function (transaction, err) {
+                                    console.log(err.message + "error in insert Report  Data");
+                                });
+                            }
+                        }
+                    }
+                    var station_id_m = "STATION_"+search_params.get('station_id');
+
+                    fetchreportwbsql(station_id_m);
+                });
+            });
+        });
+    }
+
+    function fetchreportwbsql(station_id_m){
+
+
+
+
+	websqldb.transaction(function(transaction) {
+
+
+
+
+
+        url = window.location.href;
+
+        //Get user_id
+        var reportview = document.getElementById("downloadgenerate");
+        var a = 0;
+        var b = 0;
+        var average_final = 0;
+        var oneDay = 24 * 60 * 60 * 1000;
+        var from_date = search_params.get('fromdate');
+        var to_date = search_params.get('todate');
+        var average = search_params.get('average');
+        var average1 = 0;
+
+        var frm_year = from_date.substring(0, 4);
+        var frm_month = from_date.substring(7, 5);
+        var frm_date = from_date.substring(10, 8);
+
+        var to_year = to_date.substring(0, 4);
+        var to_month = to_date.substring(7, 5);
+        var to_date = to_date.substring(10, 8);
+
+        const firstDate = new Date(frm_year, frm_month, frm_date);
+        const secondDate = new Date(to_year, to_month, to_date);
+        var diffDays = Math.round(Math.abs((firstDate - secondDate) / oneDay));
+//sdlkasaldkslkdslk
+        var parameters = search_params.get('parameter');
+        var parameters_value = parameters.split(",");
+        var parameters_count = parameters_value.length;
+        var totalcountloop = (1440 / average) * (diffDays + 1);
+
+        var average_main = average;
+        var average_main_unique = average;
+        var datemstart = from_date+" 00:00:00.000"
+        var datemstart1 = from_date+" 00:00:00.000"
+        var givento_date1 = search_params.get('todate')+" 23:59:59"
+
+        var today_date = new Date();
+        var givento_date = new Date(givento_date1);
+        var dif_extra = (givento_date - today_date);
+
+        var dif_extra = Math.round((dif_extra/1000)/60);
+
+
+        /*****graph params*************/
+        labels_array_graph = []
+        readings_value_graph_array = []
+        var readings_value_graph_array1 = []
+        var parameters_array_graph = parameters_value
+        var parameters_readings_graph = {}
+
+
+
+
+
+
+
+
+        if(dif_extra > 0) {
+        var extra_minutes = dif_extra / average;
+
+        var unwateddata = Math.round(extra_minutes);
+
+         totalcountloop = totalcountloop - unwateddata;
+
+
+
+        }
+        var total_count_records = totalcountloop * parameters_count;
+
+        document.getElementById('total_records').innerHTML =total_count_records;
+
+    for (var i = 0; i < totalcountloop; i++) {
+
+
+        var currentDate = moment(new Date(datemstart1)).add(average, 'minutes');
+
+        var d = currentDate.format('YYYY-MM-DD HH:mm:ss');
+
+
+
+
+
+
+        if (i >= 10) {
+            var datem = d;
+        } else {
+            var datem = d;
+        }
+
+        // var from_date1 = search_params.get('fromdate') + " 00:00:00";
+        // var average1 = search_params.get('average');
+        // var average_main1 = average1;
+        // var datemstart1 = from_date+" 00:00:00.000"
+        //
+        //
+        // var manual_min = a * average1;
+        // console.log(from_date1+"From Dateeeeeeeeee");
+        // var currentDate = moment(new Date(from_date1)).add(manual_min, 'minutes');
+        // var manual_date = currentDate.format('DD-MM-YY HH:mm:ss');
+
+
+        for (l = 0; l < parameters_count; l++) {
+            var queryText = "WHERE station_id = '" + station_id_m + "' AND parameters= '" + parameters_value[l] + "' AND datentime BETWEEN '" + datemstart + "' AND '" + datem + "'  ORDER BY `id`  DESC";
+            var sql = "SELECT AVG(reading) as AvgValue,station_id,analyser_id,parameters,datentime ,unit FROM `reports`" + queryText;
+
+            transaction.executeSql(sql, undefined, function (transaction, result) {
+
+                if (result.rows.length) {
+                    // readings_value_graph_array = []
+                    for (var j = 0; j < result.rows.length; j++) {
+                        a++
+                        var percent_to_display = Math.round((a/total_count_records)*100);
+                        document.getElementById('records_count').innerHTML = a;
+                        document.getElementById('percentage').style.width=percent_to_display+"%";
+                        document.getElementById('percentage').innerHTML=percent_to_display+"%";
+
+                        var row = result.rows.item(j);
+                        var station_id = row.station_id;
+                        var analyser_id = row.analyser_id;//decode json
+                        var parameter = row.parameters;//decode json
+                        var unit = row.unit;//decode json
+
+                        var paramc = parameters_count - 1;
+
+                        var datefrom = search_params.get('fromdate');
+                        var datemstart = datefrom+" 00:00:00.000";
+                        var currentDate = moment(new Date(datemstart)).add(average1, 'minutes');
+
+                        var datentime1 = currentDate.format('YYYY-MM-DD HH:mm:ss');
+
+
+
+                        var datentime = datentime1;
+                        if(a%parameters_count == 0){
+                             average1 = (a / parameters_count) * search_params.get('average');
+                        }
+
+                        if (station_id === null || station_id == 'null' || station_id == '') {
+                            var station_id_m = "STATION_" + search_params.get('station_id');
+                            station_id = station_id_m;
+                            analyser_id = '';
+                            parameter = '';
+                            unit = '';
+
+                        }
+
+
+                        try {
+                            var process_value = (row.AvgValue).toFixed(3);//decode json
+                        } catch (e) {
+                            var process_value = "-NA-";
+                        }
+
+                        labels_array_graph.push(datentime);
+                        // if(j%2 == 0){
+                        //     readings_value_graph_array1.push(process_value)
+                        // }else{
+                           readings_value_graph_array.push(process_value)
+                        // }
+
+
+                        reportview.innerHTML += "<tr  roll =\"row\" class =\"odd\"><td>" + a + "</td><td>" + station_id + "</td><td>" + parameter + "</td><td>" + process_value + "</td><td>" + unit + "</td><td>" + datentime + "</td></tr>";
+
+
+                        if (a == (totalcountloop * parameters_count)) {
+                            document.getElementById('loader1').style.display = "none";
+
+                            var readingstationdata = document.getElementById('script_c');
+                            readingstationdata.innerHTML = "<script>(function($) { 'use strict'; $(function() { $('#order-listing').DataTable({ \"aLengthMenu\": [ [5, 10, 15, -1], [5, 10, 15, \"All\"] ], \"iDisplayLength\": 10, \"language\": { search: \"\" } }); $('#order-listing').each(function() { var datatable = $(this); var search_input = datatable.closest('.dataTables_wrapper').find('div[id$=_filter] input'); search_input.attr('placeholder', 'Search'); search_input.removeClass('form-control-sm'); var length_sel = datatable.closest('.dataTables_wrapper').find('div[id$=_length] select'); length_sel.removeClass('form-control-sm'); }); }); })(jQuery);<\/script>"
+
+                            var newScript = document.createElement("script");
+                            var inlineScript = document.createTextNode("test();");
+                            newScript.appendChild(inlineScript);
+                            document.body.appendChild(newScript);
+                        }
+                        // graph_outside(labels_array_graph,parameters_array_graph,readings_value_graph_array,readings_value_graph_array1)
+                    }
+
+
+
+
+                }
+
+            }, function (transaction, err) {
+                console.log(err.message);
+            });
+
+
+        }
+
+
+
+
+        datemstart = datem;
+        average = parseInt(search_params.get('average')) + parseInt(average);//30+60 = 90
+
+
+
+        //*************here
+
+        // if(i == totalcountloop-1){
+                    //     // alert("test111")
+                    //
+                    // }
+
+
+
+
+    }
+
+    // graph_outside(labels_array_graph,parameters_array_graph,readings_value_graph_array)
+     // Chart.register(zoomPlugin);
+    // console.log("labels_array_graph************************",labels_array_graph);
+    // console.log("labels_array_graph************************",parameters_array_graph);
+    // console.log("labels_array_graph************************",readings_value_graph_array);
+    // console.log("labels_array_graph************************",dataset);
+
+
+
+	});
+
+
+
+
+
+}
+
+
+
+function graph_outside(labels_array_graph,parameters_array_graph,readings_value_graph_array){
+
+    var ctx = document.getElementById('myChart').getContext('2d');
+    var dataset = []
+    var datasetobject = {}
+    var dataReadings = []
+    const paramCount = parameters_array_graph.length
+    var testvar = readings_value_graph_array
+    var d = 0
+    for (p=0;p<paramCount;p++){
+        // var dataReadings = []
+        var randomcolor = Math.floor(Math.random()*16777215).toString(16);
+        datasetobject['label'] = parameters_array_graph[p];
+
+        datasetobject['borderColor'] = ["#"+randomcolor+"fa"];
+        datasetobject['backgroundColor'] = ["#"+randomcolor+"00"];
+        datasetobject['borderWidth'] = 2;
+        datasetobject['fill'] = false;
+        for (d=p;d<readings_value_graph_array.length;d++){
+
+            dataReadings.push(readings_value_graph_array[d]);
+            d = d+paramCount-1;
+        }
+        datasetobject['data'] = dataReadings;
+        dataReadings=[];
+        dataset.push(datasetobject)
+
+        datasetobject = {}
+    }
+
+    localStorage.setItem("jsontest", JSON.stringify(dataset));
+
+    // console.log("parameter######@@@@@@@@@@@0000",dataset)
+
+
+  myChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: labels_array_graph,
+        datasets: dataset
+    },
+  options: {
+              scales:{
+                      y:{
+                        beginAtZero:true
+                        }
+                },
+                plugins:{
+                    zoom:{
+                      pan:{
+                        enabled:true,
+                        mode:'x'
+
+                      },
+                      zoom:{
+                        mode:'x',
+                        wheel:{
+                          enabled:true
+                        },
+                      drag:{
+                        enabled:true,
+                        modifierKey:'ctrl',
+                        backgroundColor:'rgba(255, 99, 132, 0.2)',
+                        borderColor:'rgba(255, 99, 132, 1)',
+                        borderWidth:1
+
+                      },
+                      pinch:{
+                        enabled: true,
+                         modifierKey:'ctrl'
+
+                      },
+                    }
+                  }
+
+               }
+            }
+    });
+}
+function resetZoomChartdnl() {
+  // body...
+  myChart.resetZoom();
+}
+function clickprint(){
+
+
+
+     var parameters = search_params.get('parameter');
+     var parameters_array_graph = parameters.split(",");
+     var new_labels_Array = []
+
+        for (i=0;i<readings_value_graph_array.length;i++){
+            new_labels_Array.push(labels_array_graph[i]);
+            i = i+parameters_array_graph.length-1;
+        }
+
+       graph_outside(new_labels_Array,parameters_array_graph,readings_value_graph_array)
+
+}
+</script>
